@@ -19,7 +19,7 @@ def start(message):
 
 
 @bot.message_handler(commands=['help'])
-def start(message):
+def information(message):
     bot.send_message(message.chat.id, "🤖 /start - display the keyboard\n"
                                       "☁ /weather - current forecast\n"
                                       "💎 /comm5 - current cryptocurrency\n"
@@ -63,7 +63,7 @@ def webhook():
 
 
 @app.route("/")
-def webhook():
+def index():
     return "<h1>Привет, вы на странице для администрирования бота</h1>", 200
 
 
