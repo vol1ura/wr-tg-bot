@@ -1,7 +1,7 @@
-from dotenv import load_dotenv
-import os
 import requests
 import time
+
+import config
 
 
 def compass_direction(degree: int, lan='en') -> str:
@@ -13,7 +13,7 @@ def compass_direction(degree: int, lan='en') -> str:
 
 
 def get_weather(place, lat, lon, lang='ru'):
-    weather_api_key = os.environ.get('OWM_TOKEN')
+    weather_api_key = config.OWM_TOKEN
     base_url = f"http://api.openweathermap.org/data/2.5/weather?" \
                f"lat={lat}&lon={lon}&appid={weather_api_key}&units=metric&lang={lang}"
     w = requests.get(base_url).json()
@@ -28,7 +28,7 @@ def get_weather(place, lat, lon, lang='ru'):
 
 
 def get_air_quality(place, lat, lon, lang='ru'):
-    weather_api_key = os.environ.get('OWM_TOKEN')
+    weather_api_key = config.OWM_TOKEN
     base_url = f"http://api.openweathermap.org/data/2.5/air_pollution?" \
                f"lat={lat}&lon={lon}&appid={weather_api_key}"
     aq = requests.get(base_url).json()
@@ -43,10 +43,6 @@ def get_air_quality(place, lat, lon, lang='ru'):
 
 
 if __name__ == '__main__':
-    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-
     w = get_weather(43.585472, 39.723089)
     print(w)
     a = get_air_quality(43.585472, 39.723089)
