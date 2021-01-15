@@ -20,7 +20,7 @@ if os.path.exists(dotenv_path):
 TOKEN_BOT = os.environ.get('API_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN_BOT)
 logger = telebot.logger
-telebot.logger.setLevel(logging.DEBUG)  # Outputs debug messages to console.
+telebot.logger.setLevel(logging.WARNING)  # Outputs debug messages to console.
 
 # if message.chat.type == "private":
 # 	# private chat message
@@ -198,5 +198,5 @@ def simple_answers(message):
 
 
 if __name__ == '__main__':
-    # bot.remove_webhook()
-    bot.polling(none_stop=True)
+    bot.remove_webhook()
+    # bot.polling(none_stop=True)

@@ -21,9 +21,14 @@ def webhook():
     return "!", 200
 
 
-@app.route("/wakeandrunbot")
-def index():
+@app.route("/bot")
+def bot_page():
     return "<h1>Привет, вы на странице для администрирования бота</h1>", 200
+
+
+@app.route("/")
+def index():
+    return "<h1>Привет</h1>", 200
 
 
 if __name__ == '__main__':
