@@ -14,7 +14,7 @@ def getMessage():
     return "!", 200
 
 
-@app.route(f"/{os.environ.get('WEBHOOK')}")
+@app.route(f"/{config.WEBHOOK}")
 def webhook():
     bot.remove_webhook()
     bot.set_webhook(url='http://wakeandrun.pythonanywhere.com/' + TOKEN_BOT)
@@ -27,7 +27,4 @@ def index():
 
 
 if __name__ == '__main__':
-    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
     app.run()

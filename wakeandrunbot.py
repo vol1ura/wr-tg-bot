@@ -1,26 +1,21 @@
 import logging
-import os
 import random
 import re
 import time
 
-from dotenv import load_dotenv
-
-import telebot
 # https://api.telegram.org/{TOKEN}/getMe
+import telebot
 from telebot import types
 
+import config
 from utils import content, vk, instagram, weather
 from utils.news import get_competitions
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
 
-TOKEN_BOT = os.environ.get('API_BOT_TOKEN')
+TOKEN_BOT = config.API_BOT_TOKEN
 bot = telebot.TeleBot(TOKEN_BOT)
 logger = telebot.logger
-telebot.logger.setLevel(logging.DEBUG)  # Outputs debug messages to console.
+telebot.logger.setLevel(logging.WARNING)  # Outputs debug messages to console.
 
 # if message.chat.type == "private":
 # 	# private chat message
@@ -157,14 +152,14 @@ def inline_competitions(inline_query):
 
 @bot.message_handler(regexp=r'(?i)бот (паркран|parkrun)', content_types=['text'])
 def parkrun(message):
-    token = os.environ.get('VK_SERVICE_TOKEN')
+    token = config.VK_SERVICE_TOKEN
     bot.send_photo(message.chat.id, vk.get_random_photo(token), disable_notification=True)
 
 
 @bot.message_handler(regexp=r'(?i)бот (\bинстаграм|instagram)', content_types=['text'])
 def get_instagram_post(message):
-    login = os.environ.get('IG_USERNAME')
-    password = os.environ.get('IG_PASSWORD')
+    login = config.IG_USERNAME
+    password = config.IG_PASSWORD
     user = random.choice(content.instagram_profiles)
     wait_message = bot.reply_to(message, 'Сейчас что-нибудь найду, подождите...', disable_notification=True)
     ig_post = instagram.get_last_post(login, password, user)
@@ -198,5 +193,5 @@ def simple_answers(message):
 
 
 if __name__ == '__main__':
-    # bot.remove_webhook()
-    bot.polling(none_stop=True)
+    bot.remove_webhook()
+    # bot.polling(none_stop=True)
