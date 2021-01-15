@@ -1,8 +1,5 @@
 # Bot is deployed on Heroku, so it might sleep
 # after 30 mins of being inactive but could wake up (big delay around 30 secs)
-
-# from wakeandrunbot import *
-
 # https://api.telegram.org/{TOKEN}/getMe
 import random
 import re
@@ -69,12 +66,6 @@ def commands(message):
     ❓ /help, /помощь, /справка, /команды - данное сообщение
     Есть inline режим запросов.
     Кроме того, со мной можно просто поболтать.""", disable_notification=True)
-    # markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
-    # itembtn1 = types.KeyboardButton('📆 Расписание')
-    # itembtn2 = types.KeyboardButton('📱 Соцсети клуба')
-    # itembtn3 = types.KeyboardButton('👤 Администратор')
-    # itembtn4 = types.KeyboardButton('🤖 О боте')
-    # markup.add(itembtn1, itembtn2, itembtn3, itembtn4)
 
 
 @bot.message_handler(regexp=r'(?i)\bбот\b(?=.*(?:побегать|как на улице|воздух))', content_types=['text'])
@@ -198,7 +189,7 @@ def getMessage():
 @app.route(f"/{config.WEBHOOK}")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url='https://wakeandrun.pythonanywhere.com/' + TOKEN)
+    bot.set_webhook(url=config.BOT_HOSTING + TOKEN)
     return "!", 200
 
 
