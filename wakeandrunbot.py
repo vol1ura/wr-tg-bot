@@ -166,11 +166,10 @@ def get_instagram_post(message):
     login = os.environ.get('IG_USERNAME')
     password = os.environ.get('IG_PASSWORD')
     user = random.choice(content.instagram_profiles)
-    # wait_message = bot.reply_to(message, 'Сейчас что-нибудь найду, подождите...', disable_notification=True)
-    bot.send_chat_action(message.chat.id, 'Сейчас найду, подождите...')  # TODO: test this feature!!!
+    wait_message = bot.reply_to(message, 'Сейчас что-нибудь найду, подождите...', disable_notification=True)
     ig_post = instagram.get_last_post(login, password, user)
     bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
-    # bot.delete_message(wait_message.chat.id, wait_message.id)  # TODO remove after success testing
+    bot.delete_message(wait_message.chat.id, wait_message.id)  # TODO remove after success testing
 
 
 @bot.message_handler(regexp=r'(?i)\bбот\b', content_types=['text'])
@@ -198,6 +197,7 @@ def simple_answers(message):
     bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True)
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    # print(os.environ.get('API_BOT_TOKEN'))
     # bot.remove_webhook()
-    # bot.polling(none_stop=True)
+    bot.polling(none_stop=True)
