@@ -37,7 +37,8 @@ phrases_about_parkrun = [
 
 instagram_profiles = [
 "i.yadgarov", "marathonecjournal", "across_the_runiverse", "begvreden", "wakeandrun", "runcomrun", "moscowmarathon",
-"goldenringultratrail", "begovoy.monastyr", "diehardrunning", "russiarunning", "stepan_kiselev_run"
+"goldenringultratrail", "begovoy.monastyr", "diehardrunning", "russiarunning", "stepan_kiselev_run", "rocketscienze",
+"sokslav"
 ]
 
 phrases_about_admin = ['Сейчас придёт и разберётся.', 'Не буди лихо!', 'Всех в бан!', 'Модерирует и добавляет.']
@@ -53,7 +54,6 @@ about_social = """✨*Беговой клуб WAKE&RUN*✨
 🔹️ [Вконтакте](www.vk.com/wakeandrun)
 🔸 [Strava](www.strava.com/clubs/wakeandrun)"""
 
-# TODO добавить ссылки на геопозицию и маркдаун
 about_training = """📆 Тренировки проходят три раза в неделю:
 
 🕖 вторник 19:00 🚦 [кафе Сок](https://yandex.ru/maps/-/CCUINOR2XB) \(напротив Третьяковки\)

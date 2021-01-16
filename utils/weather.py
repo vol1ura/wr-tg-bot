@@ -17,13 +17,12 @@ def get_weather(place, lat, lon, lang='ru'):
     base_url = f"http://api.openweathermap.org/data/2.5/weather?" \
                f"lat={lat}&lon={lon}&appid={weather_api_key}&units=metric&lang={lang}"
     w = requests.get(base_url).json()
-    # TODO Add rain and snow volume
     wind_dir = compass_direction(w['wind']['deg'], lang)
     sunset = time.strftime("%H:%M", time.localtime(w['sys']['sunset']))
-    weather_desc = f"🏙 {place}: сейчас {w['weather'][0]['description']} \n" \
+    weather_desc = f"🏙 {place}: сейчас {w['weather'][0]['description']}\n" \
                    f"🌡 {w['main']['temp']:.1f}°C, ощущ. как {w['main']['feels_like']:.0f}°C\n" \
-                   f"💨 {w['wind']['speed']:.1f}м/с с {wind_dir}, 💦 {w['main']['humidity']}%\n" \
-                   f"🌇 {sunset}   "
+                   f"💨 {w['wind']['speed']:.1f}м/с с\xa0{wind_dir}, 💦\xa0{w['main']['humidity']}%\n" \
+                   f"🌇 {sunset} "
     return weather_desc
 
 
