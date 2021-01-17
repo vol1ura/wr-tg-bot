@@ -40,7 +40,7 @@ def send_welcome(message):
 
 
 @bot.message_handler(commands=['about', 'оботе'])
-@bot.message_handler(regexp=r'(?i)\bбот\b(?=.*о себе)', content_types=['text'])
+@bot.message_handler(regexp=r'(?i)^бот\b(?=.*о себе)', content_types=['text'])
 def about(message):
     bot.send_message(message.chat.id, content.about_message, disable_notification=True)
 
@@ -214,7 +214,7 @@ def get_instagram_post(message):
     bot.delete_message(wait_message.chat.id, wait_message.id)
 
 
-@bot.message_handler(regexp=r'(?i)\bбот\b', content_types=['text'])
+@bot.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
 def simple_answers(message):
     ans = []
     if 'как' in message.text and re.search('дел|жизнь|сам|поживаешь', message.text, re.I):
