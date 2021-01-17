@@ -17,11 +17,11 @@ def getMessage():
 @app.route(f"/{os.environ.get('WEBHOOK')}")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url='http://wakeandrun.pythonanywhere.com/' + TOKEN_BOT)
+    bot.set_webhook(url='https://wr-tg-bot.herokuapp.com/' + TOKEN_BOT)
     return "!", 200
 
 
-@app.route("/bot")
+@app.route("/wakeandrunbot")
 def index():
     return "<h1>Привет, вы на странице для администрирования бота</h1>", 200
 

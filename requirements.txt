@@ -5,7 +5,7 @@ click==7.1.2
 Flask==1.1.2
 geojson==2.5.0
 gunicorn==20.0.4
-idna<3
+idna==3.1
 inst-api==0.3.0
 instagram-private-api==1.6.0.0
 itsdangerous==1.1.0
