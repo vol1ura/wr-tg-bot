@@ -17,7 +17,7 @@ def getMessage():
 @app.route(f"/{config.WEBHOOK}")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url='https://wakeandrun.pythonanywhere.com/' + TOKEN_BOT)
+    bot.set_webhook(url='http://wakeandrun.pythonanywhere.com/' + TOKEN_BOT)
     return "!", 200
 
 
