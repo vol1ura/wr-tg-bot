@@ -1,4 +1,7 @@
 .env
+config.py
 /.idea
 /env
 /__pycache__
+/.instapi_cache
+/utils/__pycache__

@@ -45,8 +45,7 @@ def get_competitions(month, year):
         url = cells[0].xpath('.//b/a/@href')[0].strip()
         dist = ', '.join(re.findall(r'\d+ [а-я]+', cells[3].text_content()))
         description = f'✏️<a href="{url}">{title}</a>' \
-                      f'\n🕒 <b>Дата</b>: {when}' \
-                      f'\n📌 {where}' \
+                      f'\n🕒\xa0<b>Дата</b>: {when}\xa0| 📌\xa0{where}' \
                       f'\n➡️ <b>Дистанции</b>: {dist}'
         competitions.append((title, when, description))
     return competitions
