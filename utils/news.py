@@ -1,6 +1,5 @@
 import re
 import time
-
 import requests
 from lxml.html import parse
 

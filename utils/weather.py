@@ -46,7 +46,7 @@ if __name__ == '__main__':
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
 
-    w = get_weather(43.585472, 39.723089)
+    w = get_weather('Test', 43.585472, 39.723089)
     print(w)
-    a = get_air_quality(43.585472, 39.723089)
+    a = get_air_quality('Some place', 43.585472, 39.723089)
     print(a[1])

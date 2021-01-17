@@ -42,7 +42,8 @@ def send_welcome(message):
 @bot.message_handler(commands=['about', 'оботе'])
 @bot.message_handler(regexp=r'(?i)^бот\b(?=.*о себе)', content_types=['text'])
 def about(message):
-    bot.send_message(message.chat.id, content.about_message, disable_notification=True)
+    bot.send_message(message.chat.id, content.about_message,
+                     disable_notification=True, parse_mode='html', disable_web_page_preview=True)
 
 
 @bot.message_handler(commands=['admin', 'админ'])
