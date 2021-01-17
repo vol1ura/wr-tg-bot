@@ -63,9 +63,9 @@ def social(message):
                      parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
 
 
-@bot.message_handler(commands=['shedule', 'расписание'])
-@bot.message_handler(regexp=r'(?i)\bбот\b(?=.*(\bрасписани\B|когда тренировк\B))', content_types=['text'])
-def shedule(message):
+@bot.message_handler(commands=['schedule', 'расписание'])
+@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_schedule))
+def schedule(message):
     bot.send_message(message.chat.id, content.about_training,
                      parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
 
@@ -80,12 +80,6 @@ def commands(message):
     ❓ /help, /помощь, /справка, /команды - данное сообщение
     Есть inline режим запросов.
     Кроме того, со мной можно просто поболтать.""", disable_notification=True)
-    # markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
-    # itembtn1 = types.KeyboardButton('📆 Расписание')
-    # itembtn2 = types.KeyboardButton('📱 Соцсети клуба')
-    # itembtn3 = types.KeyboardButton('👤 Администратор')
-    # itembtn4 = types.KeyboardButton('🤖 О боте')
-    # markup.add(itembtn1, itembtn2, itembtn3, itembtn4)
 
 
 @bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_to_run))
@@ -93,7 +87,7 @@ def ask_to_run(message):
     if message.chat.type == "private":
         print('debug')
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
-        m1 = types.KeyboardButton('Мой район', request_location=True)
+        m1 = types.KeyboardButton('Мой район', request_location=True)  # TODO Add districts
         markup.add(m1)
         sent = bot.send_message(message.chat.id, 'Где хотите побегать?', reply_markup=markup)
         bot.register_next_step_handler(sent, get_location)
@@ -127,13 +121,13 @@ def send_run_recommendation(message, place, lat, lon):
                               'показатели загрязнения воздуха высокие. Лучше попозже.')
     elif time.gmtime(time.time()).tm_wday == 3 and time.gmtime(time.time()).tm_hour < 20:
         bot.reply_to(message, 'Сегодня ж четверговая, приходи побегать в компании! '
-                              'Информация о тренировках доступна по команде /shedule')
+                              'Информация о тренировках доступна по команде /schedule')
     elif time.gmtime(time.time()).tm_wday == 6 and time.gmtime(time.time()).tm_hour < 9:
         bot.reply_to(message, 'Сегодня ж длительная в парке, приходи на пробежку в компании! '
-                              'Информация о тренировках доступна по команде /shedule')
+                              'Информация о тренировках доступна по команде /schedule')
     elif time.gmtime(time.time()).tm_wday == 1 and time.gmtime(time.time()).tm_hour < 19:
         bot.reply_to(message, 'Сегодня ж городская пробежка, приходи! '
-                              'Информация о тренировках доступна по команде /shedule')
+                              'Информация о тренировках доступна по команде /schedule')
     else:
         bot.reply_to(message, 'Отправляйся на пробежку - сейчас хорошая погода и отличный чистый воздух!')
 
@@ -236,13 +230,15 @@ def simple_answers(message):
         return
     elif 'погода' in message.text:
         ans = ['Информацио о погоде можно получить через inline запрос: в строке сообщений наберите "@имябота погода"']
-    elif re.search(r'\bтренировк', message.text):
-        ans = [content.about_training]
-    # elif 'топ стравы' in message.text:
-    #     ans = ['Текст-----------------------------------------']
+    # elif re.search(r'\bтренировк', message.text):  # TODO add Strava results here
+    #     ans = [content.about_training]
+    elif re.search(r'GRUT|ГРУТ', message.text, re.I):
+        ans = content.phrases_grut
+    elif re.search(r'\bгречк\B|\bгречневая', message.text, re.I):
+        ans = content.phrases_grechka
     else:
         ans = content.phrases_about_running
-    bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True)
+    bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 
 if __name__ == '__main__':

@@ -2,11 +2,11 @@ import re
 from fuzzywuzzy import process, fuzz
 
 
-def compare(user_phrase, dictionary: list) -> int:
+def compare(user_phrase, dictionary: list) -> bool:
     return process.extractOne(user_phrase, dictionary)[1] >= 70
 
 
-def bot_compare(user_phrase, dictionary: list) -> int:
+def bot_compare(user_phrase, dictionary: list) -> bool:
     accost_bot = re.compile(r'\bбот\b', re.I)
     user_str = str(user_phrase)
     if accost_bot.search(user_str):
@@ -42,6 +42,9 @@ phrases_parkrun = [
     "расскажи о паркран", "новости о паркран", "что известно о паркран", "когда откроют паркран"
 ]
 
+phrases_schedule = [
+    "расписание", "тренировки клуба", "четверговые", "длительная тренировка"
+]
 
 # ===================== TESTING =============================
 if __name__ == '__main__':
