@@ -6,10 +6,11 @@ def compare(user_phrase: str, dictionary: list) -> int:
     return process.extractOne(user_phrase, dictionary)[1] >= 70
 
 
-def bot_compare(user_phrase: str, dictionary: list) -> int:
+def bot_compare(user_phrase, dictionary) -> int:
     accost_bot = re.compile(r'\bбот\b', re.I)
-    if accost_bot.search(user_phrase):
-        return process.extractOne(accost_bot.sub('', user_phrase), dictionary, scorer=fuzz.token_sort_ratio)[1] >= 70
+    user_str = str(user_phrase)
+    if accost_bot.search(user_str):
+        return process.extractOne(accost_bot.sub('', user_str), dictionary, scorer=fuzz.token_sort_ratio)[1] >= 70
     else:
         return False
 
