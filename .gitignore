@@ -1,7 +1,4 @@
 .env
-config.py
 /.idea
 /env
 /__pycache__
-/venv
-/utils/__pycache__
