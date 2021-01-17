@@ -2,11 +2,11 @@ import re
 from fuzzywuzzy import process, fuzz
 
 
-def compare(user_phrase: str, dictionary: list) -> int:
+def compare(user_phrase, dictionary: list) -> int:
     return process.extractOne(user_phrase, dictionary)[1] >= 70
 
 
-def bot_compare(user_phrase, dictionary) -> int:
+def bot_compare(user_phrase, dictionary: list) -> int:
     accost_bot = re.compile(r'\bбот\b', re.I)
     user_str = str(user_phrase)
     if accost_bot.search(user_str):
@@ -22,7 +22,7 @@ phrases_instagram = [
 ]
 
 phrases_admin = [
-    'тут главный в чате', 'админ чата', 'администратор', 'кто начальник чата', 'контакт админа'
+    'админ', 'тут главный в чате', 'админ чата', 'администратор', 'кто начальник чата', 'контакт админа'
 ]
 
 phrases_social = [

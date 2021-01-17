@@ -90,16 +90,38 @@ def commands(message):
 
 @bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_to_run))
 def ask_to_run(message):
-    # if message.chat.type == "private":
-    #     print('debug')
-    #     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
-    #     m1 = types.KeyboardButton('My position', request_location=True)
-    #     markup.add(m1)
-    #     return markup
-    #     place = 'Кузьминки'
-    # else:
-    place = 'Кузьминки'  # TODO how to get user location??? Make check for private chat and implement request
-    aq = weather.get_air_quality(place, content.places[place].lat, content.places[place].lon)
+    if message.chat.type == "private":
+        print('debug')
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
+        m1 = types.KeyboardButton('Мой район', request_location=True)
+        markup.add(m1)
+        sent = bot.send_message(message.chat.id, 'Где хотите побегать?', reply_markup=markup)
+        bot.register_next_step_handler(sent, get_location)
+    if message.chat.type == "group" or message.chat.type == "supergroup":
+        place = 'Кузьминки'
+        send_run_recommendation(message, place, content.places[place].lat, content.places[place].lon)
+
+
+def get_location(message):
+    hide_markup = telebot.types.ReplyKeyboardRemove()
+    try:
+        lat = message.location.latitude
+        lon = message.location.longitude
+        place = 'Мой район'
+    except Exception as e:
+        print(e)
+        bot.send_message(
+            message.chat.id, 'Не удалось получить ваши координаты. '
+                             'Убедитесь, что передача геопозиции включена и повторите попытку.',
+            reply_markup=hide_markup)
+        return None
+    send_run_recommendation(message, place, lat, lon)  # TODO hide keyboard
+    print(lat, lon)
+    # bot.send_message(message.chat.id, f"❌ I get your location{message.location}", reply_markup=hide_markup)
+
+
+def send_run_recommendation(message, place, lat, lon):
+    aq = weather.get_air_quality(place, lat, lon)
     if aq[0] > 3:
         bot.reply_to(message, 'Если вы с Москве, то крайне не рекомендую сейчас бегать, '
                               'показатели загрязнения воздуха высокие. Лучше попозже.')
@@ -113,7 +135,7 @@ def ask_to_run(message):
         bot.reply_to(message, 'Сегодня ж городская пробежка, приходи! '
                               'Информация о тренировках доступна по команде /shedule')
     else:
-        bot.reply_to(message, random.choice(content.phrases_about_running))
+        bot.reply_to(message, 'Отправляйся на пробежку - сейчас хорошая погода и отличный чистый воздух!')
 
 
 @bot.inline_handler(lambda query: 'погода' in query.query)
@@ -181,7 +203,7 @@ def query_competitions(inline_query):
         print(e)
 
 
-@bot.message_handler(regexp=r'(?i)бот (паркран|parkrun)', content_types=['text'])
+@bot.message_handler(regexp=r'(?i)бот,? (паркран|parkrun)', content_types=['text'])
 def get_parkrun_picture(message):
     token = os.environ.get('VK_SERVICE_TOKEN')
     bot.send_photo(message.chat.id, vk.get_random_photo(token), disable_notification=True)
