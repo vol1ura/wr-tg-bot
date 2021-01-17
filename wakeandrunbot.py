@@ -10,7 +10,7 @@ import telebot
 # https://api.telegram.org/{TOKEN}/getMe
 from telebot import types
 
-from utils import content, vk, instagram, weather, parkrun, news
+from utils import content, vk, instagram, weather, parkrun, news, search
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -46,11 +46,10 @@ def about(message):
 
 
 @bot.message_handler(commands=['admin', 'админ'])
-@bot.message_handler(regexp=r'(?i)\bбот\b(?=.*(?:тут главный|\bадмин))', content_types=['text'])
+@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_admin))
 def admin(message):
-    if message.chat.type == "private":
-        # private chat message
-        bot.send_message(message.chat.id, 'Здесь нет главных, все равны.', parse_mode=None)
+    if message.chat.type == "private":  # private chat message
+        bot.send_message(message.chat.id, 'Здесь нет админов, мы все равны.', parse_mode=None)
     else:
         admin = random.choice(bot.get_chat_administrators(message.chat.id)).user.to_dict()
         about_admin = f"\nАдмин @{admin['username']} - {admin['first_name']}  {admin['last_name']}"
@@ -58,7 +57,7 @@ def admin(message):
 
 
 @bot.message_handler(commands=['social', 'соцсети'])
-@bot.message_handler(regexp=r'(?i)\bбот\b(?=.*(\bссылк\B|\bсоцсет\B|о клубе))', content_types=['text'])
+@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_social))
 def social(message):
     bot.send_message(message.chat.id, content.about_social,
                      parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
@@ -89,18 +88,26 @@ def commands(message):
     # markup.add(itembtn1, itembtn2, itembtn3, itembtn4)
 
 
-@bot.message_handler(regexp=r'(?i)\bбот\b(?=.*(побегать|как на улице|воздух))', content_types=['text'])
-def ask_weather_or_air(message):
-    place = 'Кузьминки'
+@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_to_run))
+def ask_to_run(message):
+    # if message.chat.type == "private":
+    #     print('debug')
+    #     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
+    #     m1 = types.KeyboardButton('My position', request_location=True)
+    #     markup.add(m1)
+    #     return markup
+    #     place = 'Кузьминки'
+    # else:
+    place = 'Кузьминки'  # TODO how to get user location??? Make check for private chat and implement request
     aq = weather.get_air_quality(place, content.places[place].lat, content.places[place].lon)
     if aq[0] > 3:
         bot.reply_to(message, 'Если вы с Москве, то крайне не рекомендую сейчас бегать, '
                               'показатели загрязнения воздуха высокие. Лучше попозже.')
     elif time.gmtime(time.time()).tm_wday == 3 and time.gmtime(time.time()).tm_hour < 20:
-        bot.reply_to(message, 'Сегодня ж четверговая, приходи и бегай! '
+        bot.reply_to(message, 'Сегодня ж четверговая, приходи побегать в компании! '
                               'Информация о тренировках доступна по команде /shedule')
     elif time.gmtime(time.time()).tm_wday == 6 and time.gmtime(time.time()).tm_hour < 9:
-        bot.reply_to(message, 'Сегодня ж длительная в парке, приходи и бегай! '
+        bot.reply_to(message, 'Сегодня ж длительная в парке, приходи на пробежку в компании! '
                               'Информация о тренировках доступна по команде /shedule')
     elif time.gmtime(time.time()).tm_wday == 1 and time.gmtime(time.time()).tm_hour < 19:
         bot.reply_to(message, 'Сегодня ж городская пробежка, приходи! '
@@ -144,7 +151,7 @@ def query_parkrun(inline_query):
             f'{2}', 'Как установить клуб в parkrun?', description='ссылка на клуб Wake&Run',
             input_message_content=types.InputTextMessageContent(parkrun.get_club(),
                                                                 parse_mode='Markdown', disable_web_page_preview=True))
-        bot.answer_inline_query(inline_query.id, [m2, m1])#, cache_time=10)  # FIXME remove after debug
+        bot.answer_inline_query(inline_query.id, [m2, m1], cache_time=100000)  # FIXME change time for debug
     except Exception as e:
         print(e)
 
@@ -180,7 +187,7 @@ def get_parkrun_picture(message):
     bot.send_photo(message.chat.id, vk.get_random_photo(token), disable_notification=True)
 
 
-@bot.message_handler(regexp=r'(?i)бот (\bинстаграм|instagram)', content_types=['text'])
+@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_instagram))
 def get_instagram_post(message):
     login = os.environ.get('IG_USERNAME')
     password = os.environ.get('IG_PASSWORD')
@@ -199,7 +206,7 @@ def simple_answers(message):
     elif re.search('привет|hi|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
         ans = [s.format(user) for s in content.greeting]
-    elif re.search(r'\bрасска\B', message.text) and re.search('паркран|parkrun', message.text, re.I):
+    elif search.bot_compare(message.text, search.phrases_parkrun):
         ans = content.phrases_about_parkrun
 
     if ans:
