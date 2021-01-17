@@ -170,7 +170,7 @@ def get_instagram_post(message):
 @bot.message_handler(regexp=r'(?i)\bбот\b', content_types=['text'])
 def simple_answers(message):
     ans = []
-    if 'как' in message.text and re.search('\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
+    if 'как' in message.text and re.search('дел|жизнь|сам|поживаешь', message.text, re.I):
         ans = content.phrases_about_myself
     elif re.search('привет|hi|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
