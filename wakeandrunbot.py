@@ -10,7 +10,7 @@ import telebot
 # https://api.telegram.org/{TOKEN}/getMe
 from telebot import types
 
-from utils import content, vk, instagram, weather, parkrun, news, search
+from utils import content, vk, instagram, weather, parkrun, news, fucomp, search
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -47,7 +47,7 @@ def about(message):
 
 
 @bot.message_handler(commands=['admin', 'админ'])
-@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_admin))
+@bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_admin))
 def admin(message):
     if message.chat.type == "private":  # private chat message
         bot.send_message(message.chat.id, 'Здесь нет админов, мы все равны.', parse_mode=None)
@@ -58,14 +58,14 @@ def admin(message):
 
 
 @bot.message_handler(commands=['social', 'соцсети'])
-@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_social))
+@bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_social))
 def social(message):
     bot.send_message(message.chat.id, content.about_social,
                      parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
 
 
 @bot.message_handler(commands=['schedule', 'расписание'])
-@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_schedule))
+@bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_schedule))
 def schedule(message):
     bot.send_message(message.chat.id, content.about_training,
                      parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
@@ -83,13 +83,15 @@ def commands(message):
     Кроме того, со мной можно просто поболтать.""", disable_notification=True)
 
 
-@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_to_run))
+@bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_to_run))
 def ask_to_run(message):
     if message.chat.type == "private":
-        print('debug')
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
-        m1 = types.KeyboardButton('Мой район', request_location=True)  # TODO Add districts
-        markup.add(m1)
+        markup.row(types.KeyboardButton('Мой район', request_location=True))
+        places_b = [
+            types.KeyboardButton(place) for i, place in enumerate(content.places.keys()) if i < 4
+        ]
+        markup.add(*places_b)
         sent = bot.send_message(message.chat.id, 'Где хотите побегать?', reply_markup=markup)
         bot.register_next_step_handler(sent, get_location)
     if message.chat.type == "group" or message.chat.type == "supergroup":
@@ -106,8 +108,8 @@ def get_location(message):
     except Exception as e:
         print(e)
         bot.send_message(
-            message.chat.id, 'Не удалось получить ваши координаты. '
-                             'Убедитесь, что передача геопозиции включена и повторите попытку.',
+            message.chat.id, 'Этот функционал пока не реализован. Извините.', #'Не удалось получить ваши координаты. '
+                             #'Убедитесь, что передача геопозиции включена и повторите попытку.',
             reply_markup=hide_markup)
         return None
     send_run_recommendation(message, place, lat, lon)  # TODO hide keyboard
@@ -118,7 +120,7 @@ def get_location(message):
 def send_run_recommendation(message, place, lat, lon):
     aq = weather.get_air_quality(place, lat, lon)
     if aq[0] > 3:
-        bot.reply_to(message, 'Если вы с Москве, то крайне не рекомендую сейчас бегать, '
+        bot.reply_to(message, 'Если вы в Москве, то крайне не рекомендую сейчас бегать, '
                               'показатели загрязнения воздуха высокие. Лучше попозже.')
     elif time.gmtime(time.time()).tm_wday == 3 and time.gmtime(time.time()).tm_hour < 20:
         bot.reply_to(message, 'Сегодня ж четверговая, приходи побегать в компании! '
@@ -204,7 +206,7 @@ def get_parkrun_picture(message):
     bot.send_photo(message.chat.id, vk.get_random_photo(token), disable_notification=True)
 
 
-@bot.message_handler(func=lambda message: search.bot_compare(message.text, search.phrases_instagram))
+@bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_instagram))
 def get_instagram_post(message):
     login = os.environ.get('IG_USERNAME')
     password = os.environ.get('IG_PASSWORD')
@@ -223,7 +225,7 @@ def simple_answers(message):
     elif re.search('привет|hi|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
         ans = [s.format(user) for s in content.greeting]
-    elif search.bot_compare(message.text, search.phrases_parkrun):
+    elif fucomp.bot_compare(message.text, fucomp.phrases_parkrun):
         ans = content.phrases_about_parkrun
 
     if ans:
@@ -238,7 +240,9 @@ def simple_answers(message):
     elif re.search(r'\bгречк\B|\bгречневая', message.text, re.I):
         ans = content.phrases_grechka
     else:
-        ans = content.phrases_about_running
+        ans = [search.google(message.text)]
+        if not ans[0]:
+            ans = content.phrases_about_running
     bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 

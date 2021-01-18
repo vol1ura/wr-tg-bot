@@ -1,65 +1,52 @@
+# https://cse.google.com/cse/all
+import os
+import random
 import re
-from fuzzywuzzy import process, fuzz
+import urllib.parse
+from lxml.html import parse
+from pprint import pprint
+
+import requests
+from dotenv import load_dotenv
 
 
-def compare(user_phrase, dictionary: list) -> bool:
-    return process.extractOne(user_phrase, dictionary)[1] >= 70
+def google(phrase):
+    search_prase = re.sub(r'бот|\.|,|!', '', phrase, re.I) + ' бег'
+    params = {
+        "q": f"{search_prase}",
+        "key": f"{os.environ.get('GOOGLE_API_KEY')}",
+        "cx": f"{os.environ.get('GOOGLE_CX')}"
+    }
+    values_url = urllib.parse.urlencode(params)
+    result = requests.get(f'https://www.googleapis.com/customsearch/v1?' + values_url)
+    try:
+        res1 = random.choice(result.json()['items'])['htmlSnippet']
+    except KeyError:
+        return ''
+    res2 = re.sub(r'(?im)<b>|</b>|\.\.\.|<br>|&nbsp;|&quot;|\n', '', res1)
+    res3 = re.sub(r'Марафорум - форум о любительском беге, тренировках,( соревнованиях.)?', '', res2, re.MULTILINE)
+    return re.sub(r'[,\.!?][\w ]+$', '.', res3.strip(), re.MULTILINE)
 
 
-def bot_compare(user_phrase, dictionary: list) -> bool:
-    accost_bot = re.compile(r'\bбот\b', re.I)
-    user_str = str(user_phrase)
-    if accost_bot.search(user_str):
-        return process.extractOne(accost_bot.sub('', user_str), dictionary, scorer=fuzz.token_sort_ratio)[1] >= 70
-    else:
-        return False
+def bashim(phrase):
+    search_prase = re.sub(r'бот|\.|,|!|\?', '', phrase, re.I).strip()
+    params = {
+        "text": f"{search_prase}"
+    }
+    values_url = urllib.parse.urlencode(params)
+    result = requests.get(f'https://bash.im/search?' + values_url, stream=True)
+    result.raw.decode_content = True
+    tree = parse(result.raw)
+    cite = tree.xpath('//article/div/div')
+    if cite:
+        print(cite)
+        return re.split(r'[\w\. ]+?:', re.sub(r'\n', '', random.choice(cite).text_content().strip()).strip())
 
 
-# ======================= DICTIONARIES TO COMPARE =======================================================
-phrases_instagram = [
-    'инстаграм бег', 'instagram', 'пишут спортсмены', 'пишут спортивные каналы', 'статья о беге',
-    'новость бег', 'последн публикаци', 'беговой блог', 'новость в каналах', 'новости спорта'
-]
-
-phrases_admin = [
-    'админ', 'тут главный в чате', 'админ чата', 'администратор', 'кто начальник чата', 'контакт админа'
-]
-
-phrases_social = [
-    'соцсети клуба', 'ссылки на клуб', 'клуб в интернете', 'информация о клубе', 'клуб в vk', "клуб в фейсбук",
-    'клуб в страве'
-]
-
-phrases_weather = [
-    'погода на улице', 'информация о погоде', 'прогноз погоды'
-]
-
-phrases_to_run = [
-    'где бегать', 'бег на улице', 'хочу побегать', 'с кем бегать', "можно бегать", "тренировка на улице"
-]
-
-phrases_parkrun = [
-    "расскажи о паркран", "новости о паркран", "что известно о паркран", "когда откроют паркран"
-]
-
-phrases_schedule = [
-    "расписание", "тренировки клуба", "четверговые", "длительная тренировка"
-]
-
-# ===================== TESTING =============================
 if __name__ == '__main__':
-    phrase1 = 'бот, покажи статью о беге'
-    phrase2 = 'Бот, кто администратор чата?'
-    phrase3 = 'Бот, покажи ссылки на клуб'
-    phrase4 = 'бот, когда откроют паркраны?'
-    test_phrases = [phrase1, phrase2, phrase3, phrase4]
+    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
+    if os.path.exists(dotenv_path):
+        load_dotenv(dotenv_path)
 
-    compare1 = list(map(lambda p: bot_compare(p, phrases_instagram), test_phrases))
-    compare2 = list(map(lambda p: bot_compare(p, phrases_admin), test_phrases))
-    compare3 = list(map(lambda p: bot_compare(p, phrases_social), test_phrases))
-    compare4 = list(map(lambda p: bot_compare(p, phrases_parkrun), test_phrases))
-
-    print(compare1)
-    print(compare2)
-    print(compare3)
-    print(compare4)
+    s = google('бот, погода')
+    print(s)
