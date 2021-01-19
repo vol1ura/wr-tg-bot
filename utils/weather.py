@@ -42,12 +42,11 @@ def get_air_quality(place, lat, lon, lang='ru'):
     return aqi, air_conditions
 
 
-pollutant = {'SO 2': 'SO₂', 'PM 2.5': 'PM2.5', 'O 3': 'O₃', 'PM 10': 'PM10', 'NO 2': 'NO₂', 'CO': 'CO'}
-category = {'Fair': '🙂', 'Excellent': '👍', 'Poor': '😐', 'Unhealthy': '🙁', 'Very Unhealthy': '🤢', 'Dangerous': '☠'}
-air_index = {'Fair': 2, 'Excellent': 1, 'Poor': 3, 'Unhealthy': 4, 'Very Unhealthy': 5, 'Dangerous': 6}
-
-
 def get_air_accu(lat, lon):
+    pollutant = {'SO 2': 'SO₂', 'PM 2.5': 'PM2.5', 'O 3': 'O₃', 'PM 10': 'PM10', 'NO 2': 'NO₂', 'CO': 'CO'}
+    category = {'Fair': '🙂', 'Excellent': '👍', 'Poor': '😐', 'Unhealthy': '🙁', 'Very Unhealthy': '🤢',
+                'Dangerous': '☠'}
+    air_index = {'Fair': 2, 'Excellent': 1, 'Poor': 3, 'Unhealthy': 4, 'Very Unhealthy': 5, 'Dangerous': 6}
     url = f"http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?" \
           f"apikey={os.environ.get('ACCW_KEY')}&q={lat}%2C{lon}&language=ru-ru"
     result = requests.get(url).json()
