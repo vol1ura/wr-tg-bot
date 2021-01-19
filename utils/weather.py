@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import requests
 import time
+from lxml.html import parse
 
 
 def compass_direction(degree: int, lan='en') -> str:
@@ -41,12 +42,54 @@ def get_air_quality(place, lat, lon, lang='ru'):
     return aqi, air_conditions
 
 
+pollutant = {'SO 2': 'SO₂', 'PM 2.5': 'PM2.5', 'O 3': 'O₃', 'PM 10': 'PM10', 'NO 2': 'NO₂', 'CO': 'CO'}
+category = {'Fair': '🙂', 'Excellent': '👍', 'Poor': '😐', 'Unhealthy': '🙁', 'Very Unhealthy': '🤢', 'Dangerous': '☠'}
+air_index = {'Fair': 2, 'Excellent': 1, 'Poor': 3, 'Unhealthy': 4, 'Very Unhealthy': 5, 'Dangerous': 6}
+
+
+def get_air_accu(lat, lon):
+    url = f"http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?" \
+          f"apikey={os.environ.get('ACCW_KEY')}&q={lat}%2C{lon}&language=ru-ru"
+    result = requests.get(url).json()
+    key = result['Key']
+    name = result['EnglishName']
+    url = f'https://www.accuweather.com/en/ru/{name}/{key}/air-quality-index/{key}'
+    headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+        "Connection": "keep-alive",
+        "Host": "www.accuweather.com",
+        "Sec-GPC": "1",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
+    }
+    result = requests.get(url, headers=headers, stream=True)
+    result.raw.decode_content = True
+    tree = parse(result.raw)
+    aqi_category = tree.xpath('//*/p[@class="category-text"]')[0].text_content().strip()
+    air_description = f'воздух {category[aqi_category]}'
+    rows = tree.xpath('//div[contains(@class, "air-quality-pollutant")]')
+    for row in rows:
+        p = row.xpath('.//div[@class="display-type"]')[0].text_content().strip()
+        if p[-1] == '0':
+            continue
+        cat = row.xpath('.//div[@class="category"]')[0].text_content().strip()
+        v_aqp = row.xpath('.//div[@class="pollutant-concentration"]')[0].text_content().split()[0]
+        air_description += f', {v_aqp}({pollutant[p]}) {category[cat]}'
+    air_description += ', в µg/m³.'
+    return air_index[aqi_category], air_description
+
+
 if __name__ == '__main__':
     dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
 
-    w = get_weather('Test', 43.585472, 39.723089)
-    print(w)
-    a = get_air_quality('Some place', 43.585472, 39.723089)
-    print(a[1])
+    lat = 54.045048
+    lon = 37.507175
+    print(get_air_accu(lat, lon))
+    # w = get_weather('Test', 43.585472, 39.723089)
+    # print(w)
+    # a = get_air_quality('Some place', 43.585472, 39.723089)
+    # print(a[1])

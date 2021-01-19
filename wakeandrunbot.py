@@ -22,18 +22,6 @@ bot = telebot.TeleBot(TOKEN_BOT)
 logger = telebot.logger
 telebot.logger.setLevel(logging.WARNING)  # Outputs debug messages to console.
 
-# if message.chat.type == "private":
-# 	# private chat message
-#
-# if message.chat.type == "group":
-# 	# group chat message
-#
-# if message.chat.type == "supergroup":
-# 	# supergroup chat message
-#
-# if message.chat.type == "channel":
-# 	# channel message
-
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -88,7 +76,7 @@ def commands(message):
 def ask_weather(message):
     match = re.search(r'бот,? (?:покажи )?(погод\w|воздух) ([\w, ]+)', message.text, re.I)
     if match:
-        place = match.group(2).strip()
+        place = re.sub(r' в\b', '', match.group(2).strip())
         app = Nominatim(user_agent="wr-tg-bot")
         try:
             location = app.geocode(place).raw
@@ -98,59 +86,7 @@ def ask_weather(message):
         if match.group(1).startswith('погод'):
             bot.send_message(message.chat.id, weather.get_weather(place, location['lat'], location['lon']))
         else:
-            bot.send_message(message.chat.id, weather.get_air_quality(place, location['lat'], location['lon'])[1])
-
-
-@bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_to_run))
-def ask_to_run(message):
-    if message.chat.type == "private":
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
-        markup.row(types.KeyboardButton('Мой район', request_location=True))
-        places_b = [
-            types.KeyboardButton(place) for i, place in enumerate(content.places.keys()) if i < 4
-        ]
-        markup.add(*places_b)
-        sent = bot.send_message(message.chat.id, 'Где хотите побегать?', reply_markup=markup)
-        bot.register_next_step_handler(sent, get_location)
-    if message.chat.type == "group" or message.chat.type == "supergroup":
-        place = 'Кузьминки'
-        send_run_recommendation(message, place, content.places[place].lat, content.places[place].lon)
-
-
-def get_location(message):
-    hide_markup = telebot.types.ReplyKeyboardRemove()
-    try:
-        lat = message.location.latitude
-        lon = message.location.longitude
-        place = 'Мой район'
-    except Exception as e:
-        print(e)
-        bot.send_message(
-            message.chat.id, 'Этот функционал пока не реализован. Извините.', #'Не удалось получить ваши координаты. '
-                             #'Убедитесь, что передача геопозиции включена и повторите попытку.',
-            reply_markup=hide_markup)
-        return None
-    send_run_recommendation(message, place, lat, lon)  # TODO hide keyboard
-    print(lat, lon)
-    # bot.send_message(message.chat.id, f"❌ I get your location{message.location}", reply_markup=hide_markup)
-
-
-def send_run_recommendation(message, place, lat, lon):
-    aq = weather.get_air_quality(place, lat, lon)
-    if aq[0] > 3:
-        bot.reply_to(message, 'Если вы в Москве, то крайне не рекомендую сейчас бегать, '
-                              'показатели загрязнения воздуха высокие. Лучше попозже.')
-    elif time.gmtime(time.time()).tm_wday == 3 and time.gmtime(time.time()).tm_hour < 20:
-        bot.reply_to(message, 'Сегодня ж четверговая, приходи побегать в компании! '
-                              'Информация о тренировках доступна по команде /schedule')
-    elif time.gmtime(time.time()).tm_wday == 6 and time.gmtime(time.time()).tm_hour < 9:
-        bot.reply_to(message, 'Сегодня ж длительная в парке, приходи на пробежку в компании! '
-                              'Информация о тренировках доступна по команде /schedule')
-    elif time.gmtime(time.time()).tm_wday == 1 and time.gmtime(time.time()).tm_hour < 19:
-        bot.reply_to(message, 'Сегодня ж городская пробежка, приходи! '
-                              'Информация о тренировках доступна по команде /schedule')
-    else:
-        bot.reply_to(message, 'Отправляйся на пробежку - сейчас хорошая погода и отличный чистый воздух!')
+            bot.send_message(message.chat.id, f'{place}: ' + weather.get_air_accu(location['lat'], location['lon'])[1])
 
 
 @bot.inline_handler(lambda query: 'погода' in query.query)
@@ -188,7 +124,7 @@ def query_parkrun(inline_query):
             f'{2}', 'Как установить клуб в parkrun?', description='ссылка на клуб Wake&Run',
             input_message_content=types.InputTextMessageContent(parkrun.get_club(),
                                                                 parse_mode='Markdown', disable_web_page_preview=True))
-        bot.answer_inline_query(inline_query.id, [m2, m1], cache_time=100000)  # FIXME change time for debug
+        bot.answer_inline_query(inline_query.id, [m2, m1], cache_time=100000)
     except Exception as e:
         print(e)
 
@@ -207,7 +143,6 @@ def query_competitions(inline_query):
             else:
                 month += 1
             competitions += news.get_competitions(month, year)
-
         queries = []
         for i, comp in enumerate(competitions, 1):
             queries.append(types.InlineQueryResultArticle(
@@ -250,10 +185,8 @@ def simple_answers(message):
         bot.reply_to(message, random.choice(ans), disable_web_page_preview=True)
         return
     elif 'погода' in message.text:
-        ans = ['Информацио о погоде можно получить через inline запрос: в строке сообщений наберите "@имябота погода".'
+        ans = ['Информацию о погоде можно получить через inline запрос: в строке сообщений наберите "@имябота погода".'
                'Либо, набрав сообщение, "Бот, погода Населённый пункт", например, "Бот, погода Кузьминки Москва".']
-    # elif re.search(r'\bтренировк', message.text):  # TODO add Strava results here
-    #     ans = [content.about_training]
     elif re.search(r'GRUT|ГРУТ', message.text, re.I):
         ans = content.phrases_grut
     elif re.search(r'\bгречк\B|\bгречневая', message.text, re.I):
