@@ -37,10 +37,13 @@ def bashim(phrase):
     result = requests.get(f'https://bash.im/search?' + values_url, stream=True)
     result.raw.decode_content = True
     tree = parse(result.raw)
-    cite = tree.xpath('//article/div/div')
-    if cite:
-        print(cite)
-        return re.split(r'[\w\. ]+?:', re.sub(r'\n', '', random.choice(cite).text_content().strip()).strip())
+    cites = tree.xpath('//article/div/div')
+    if cites:
+        for cite in cites:
+            cite = re.split(r'[\w\. ]+?:', re.sub(r'\n', '', cite.text_content()))
+            [cite.remove(s) for s in list(cite) if s == '']
+            print(f'"{cite[0].strip()}",')
+    return ''
 
 
 if __name__ == '__main__':
@@ -48,5 +51,5 @@ if __name__ == '__main__':
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
 
-    s = google('бот, погода')
+    s = bashim('бот, гречка')
     print(s)
