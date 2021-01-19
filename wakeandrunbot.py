@@ -86,7 +86,7 @@ def ask_weather(message):
         if match.group(1).startswith('погод'):
             bot.send_message(message.chat.id, weather.get_weather(place, location['lat'], location['lon']))
         else:
-            bot.send_message(message.chat.id, f'{place}: ' + weather.get_air_accu(location['lat'], location['lon'])[1])
+            bot.send_message(message.chat.id, weather.get_air_quality(place, location['lat'], location['lon'])[1])
 
 
 @bot.inline_handler(lambda query: 'погода' in query.query)
