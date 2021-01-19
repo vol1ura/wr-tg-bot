@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 
 def google(phrase):
-    search_prase = re.sub(r'бот|\.|,|!', '', phrase, re.I) + ' бег'
+    search_prase = re.sub(r'бот|\.|,|!', '', phrase, re.I)
     params = {
         "q": f"{search_prase}",
         "key": f"{os.environ.get('GOOGLE_API_KEY')}",
@@ -25,7 +25,8 @@ def google(phrase):
         return ''
     res2 = re.sub(r'(?im)<b>|</b>|\.\.\.|<br>|&nbsp;|&quot;|\n', '', res1)
     res3 = re.sub(r'Марафорум - форум о любительском беге, тренировках,( соревнованиях.)?', '', res2, re.MULTILINE)
-    return re.sub(r'[,\.!?][\w ]+$', '.', res3.strip(), re.MULTILINE)
+    res4 = re.sub(r' Сейчас этот раздел просматривают:.*', '.', res3, re.MULTILINE)
+    return re.sub(r'[,\.!?][\w ]+$', '.', res4.strip(), re.MULTILINE)
 
 
 def bashim(phrase):

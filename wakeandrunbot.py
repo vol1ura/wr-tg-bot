@@ -3,6 +3,7 @@ import os
 import random
 import re
 import time
+from geopy.geocoders import Nominatim
 
 from dotenv import load_dotenv
 
@@ -83,6 +84,23 @@ def commands(message):
     Кроме того, со мной можно просто поболтать.""", disable_notification=True)
 
 
+@bot.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
+def ask_weather(message):
+    match = re.search(r'бот,? (?:покажи )?(погод\w|воздух) ([\w, ]+)', message.text, re.I)
+    if match:
+        place = match.group(2).strip()
+        app = Nominatim(user_agent="wr-tg-bot")
+        try:
+            location = app.geocode(place).raw
+        except AttributeError:
+            return bot.reply_to(message, 'Есть такой населённый пункт? ...не знаю. Введите запрос в в формате '
+                                         '"Бот, погода Город" или "Бот, воздух Название Область".')
+        if match.group(1).startswith('погод'):
+            bot.send_message(message.chat.id, weather.get_weather(place, location['lat'], location['lon']))
+        else:
+            bot.send_message(message.chat.id, weather.get_air_quality(place, location['lat'], location['lon'])[1])
+
+
 @bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_to_run))
 def ask_to_run(message):
     if message.chat.type == "private":
@@ -147,7 +165,7 @@ def query_weather(inline_query):
         print(e)
 
 
-@bot.inline_handler(lambda query: query.query == 'воздух')
+@bot.inline_handler(lambda query: 'воздух' in query.query)
 def query_air(inline_query):
     try:
         places_air = [types.InlineQueryResultArticle(
@@ -220,7 +238,7 @@ def get_instagram_post(message):
 @bot.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
 def simple_answers(message):
     ans = []
-    if 'как' in message.text and re.search('дел|жизнь|сам|поживаешь', message.text, re.I):
+    if 'как' in message.text and re.search('\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
         ans = content.phrases_about_myself
     elif re.search('привет|hi|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
@@ -232,7 +250,8 @@ def simple_answers(message):
         bot.reply_to(message, random.choice(ans), disable_web_page_preview=True)
         return
     elif 'погода' in message.text:
-        ans = ['Информацио о погоде можно получить через inline запрос: в строке сообщений наберите "@имябота погода"']
+        ans = ['Информацио о погоде можно получить через inline запрос: в строке сообщений наберите "@имябота погода".'
+               'Либо, набрав сообщение, "Бот, погода Населённый пункт", например, "Бот, погода Кузьминки Москва".']
     # elif re.search(r'\bтренировк', message.text):  # TODO add Strava results here
     #     ans = [content.about_training]
     elif re.search(r'GRUT|ГРУТ', message.text, re.I):

@@ -4,7 +4,9 @@ chardet==4.0.0
 click==7.1.2
 Flask==1.1.2
 fuzzywuzzy==0.18.0
+geographiclib==1.50
 geojson==2.5.0
+geopy==2.1.0
 gunicorn==20.0.4
 idna==2.10
 inst-api==0.3.0
