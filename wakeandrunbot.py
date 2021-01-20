@@ -1,4 +1,3 @@
-import locale
 import logging
 import os
 import random
@@ -17,8 +16,6 @@ from utils import content, vk, instagram, weather, parkrun, news, fucomp, search
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
-
-locale.setlocale(locale.LC_ALL, ('ru_RU', 'UTF-8'))
 
 TOKEN_BOT = os.environ.get('API_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN_BOT)
