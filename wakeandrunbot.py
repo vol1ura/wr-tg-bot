@@ -1,3 +1,4 @@
+import locale
 import logging
 import os
 import random
@@ -16,6 +17,8 @@ from utils import content, vk, instagram, weather, parkrun, news, fucomp, search
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
+
+locale.setlocale(locale.LC_ALL, ('ru_RU', 'UTF-8'))
 
 TOKEN_BOT = os.environ.get('API_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN_BOT)
@@ -192,7 +195,7 @@ def simple_answers(message):
                'Либо, набрав сообщение, "Бот, погода Населённый пункт", например, "Бот, погода Кузьминки Москва".']
     elif re.search(r'GRUT|ГРУТ', message.text, re.I):
         ans = content.phrases_grut
-    elif re.search(r'\bгречк\B|\bгречневая', message.text, re.I):
+    elif re.search(r'\bгречк|\bгречневая', message.text, re.I):
         ans = content.phrases_grechka
     else:
         ans = [search.google(message.text)]
