@@ -47,7 +47,7 @@ def get_place_accu_params(lat, lon):
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+        "Accept-Language": "en-US;q=0.8,en;q=0.3",
         "Connection": "keep-alive",
         "Host": "www.accuweather.com",
         "Referer": "https://www.accuweather.com/",
@@ -57,6 +57,7 @@ def get_place_accu_params(lat, lon):
         "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
     }
     result = requests.get(url, headers=headers).url.split('/')
+    print(result)
     return result[-1], result[-4]
 
 
@@ -69,7 +70,7 @@ def get_air_accu(key, name):
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+        "Accept-Language": "en-US;q=0.8,en;q=0.3",
         "Connection": "keep-alive",
         "Host": "www.accuweather.com",
         "Sec-GPC": "1",
@@ -102,7 +103,7 @@ if __name__ == '__main__':
     lon = 37.507175
     my_name = 'tyelyatinki'
     my_key = 2442389
-    # print(get_place_accu_params(lat, lon))
+    print(get_place_accu_params(lat, lon))
     print(get_air_accu(*get_place_accu_params(lat, lon)))
     # w = get_weather('Test', 43.585472, 39.723089)
     # print(w)
