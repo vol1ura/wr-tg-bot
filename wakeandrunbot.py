@@ -84,9 +84,12 @@ def ask_weather(message):
             return bot.reply_to(message, 'Есть такой населённый пункт? ...не знаю. Введите запрос в в формате '
                                          '"Бот, погода Город" или "Бот, воздух Название Область".')
         if match.group(1).startswith('погод'):
+            bot.send_chat_action(message.chat.id, 'typing')
             bot.send_message(message.chat.id, weather.get_weather(place, location['lat'], location['lon']))
         else:
-            bot.send_message(message.chat.id, weather.get_air_quality(place, location['lat'], location['lon'])[1])
+            bot.send_chat_action(message.chat.id, 'typing')
+            place_par = weather.get_place_accu_params(location['lat'], location['lon'])
+            bot.send_message(message.chat.id, f'{place}: ' + weather.get_air_accu(*place_par)[1])
 
 
 @bot.inline_handler(lambda query: 'погода' in query.query)

@@ -42,17 +42,30 @@ def get_air_quality(place, lat, lon, lang='ru'):
     return aqi, air_conditions
 
 
-def get_air_accu(lat, lon):
+def get_place_accu_params(lat, lon):
+    url = f'https://www.accuweather.com/en/search-locations?query={lat}%2C{lon}'
+    headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+        "Connection": "keep-alive",
+        "Host": "www.accuweather.com",
+        "Referer": "https://www.accuweather.com/",
+        "Sec-GPC": "1",
+        "TE": "Trailers",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
+    }
+    result = requests.get(url, headers=headers).url.split('/')
+    return result[-1], result[-4]
+
+
+def get_air_accu(key, name):
     pollutant = {'SO 2': 'SO₂', 'PM 2.5': 'PM2.5', 'O 3': 'O₃', 'PM 10': 'PM10', 'NO 2': 'NO₂', 'CO': 'CO'}
     category = {'Fair': '🙂', 'Excellent': '👍', 'Poor': '😐', 'Unhealthy': '🙁', 'Very Unhealthy': '🤢',
                 'Dangerous': '☠'}
     air_index = {'Fair': 2, 'Excellent': 1, 'Poor': 3, 'Unhealthy': 4, 'Very Unhealthy': 5, 'Dangerous': 6}
-    url = f"http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?" \
-          f"apikey={os.environ.get('ACCW_KEY')}&q={lat}%2C{lon}&language=ru-ru"
-    result = requests.get(url).json()
-    key = result['Key']
-    name = result['EnglishName']
-    url = f'https://www.accuweather.com/en/ru/{name}/{key}/air-quality-index/{key}'
+    url = f'https://www.accuweather.com/en/en/{name}/{key}/air-quality-index/{key}'
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Encoding": "gzip, deflate, br",
@@ -87,7 +100,10 @@ if __name__ == '__main__':
 
     lat = 54.045048
     lon = 37.507175
-    print(get_air_accu(lat, lon))
+    my_name = 'tyelyatinki'
+    my_key = 2442389
+    # print(get_place_accu_params(lat, lon))
+    print(get_air_accu(*get_place_accu_params(lat, lon)))
     # w = get_weather('Test', 43.585472, 39.723089)
     # print(w)
     # a = get_air_quality('Some place', 43.585472, 39.723089)
