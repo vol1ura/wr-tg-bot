@@ -3,6 +3,19 @@ import requests
 from lxml.html import parse
 
 
+top_volunteers = """Toп 10 волонтёров parkrun Kuzminki
+1. Максим СИЛАЕВ | 156
+2. Янчик КРЖИЖАНОВСКАЯ | 125
+3. Александр ЩЁЛОКОВ | 119
+4. Ольга АКИМОВА | 100
+5. Наталия ДУЛЕБЕНЕЦ | 92
+6. Андрей ЛЕТУНОВСКИЙ | 84
+7. Оксана ГАМЗИНА | 71
+8. Анастасия КАЗАНЦЕВА | 69
+9. Сергей КОТЛОВ | 58
+10. Альфия ЗАЙНУТДИНОВА | 55"""
+
+
 def get_participants():
     headers = {"Accept": "text/html",
                "Accept-Encoding": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
