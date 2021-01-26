@@ -88,7 +88,9 @@ def ask_weather(message):
             bot.send_message(message.chat.id, weather.get_weather(place, location['lat'], location['lon']))
         else:
             bot.send_chat_action(message.chat.id, 'typing')
-            bot.send_message(message.chat.id, weather.get_air_quality(place, location['lat'], location['lon'])[1])
+            aq_url = weather.get_place_accu_params(location['lat'], location['lon'])
+            bot.send_message(message.chat.id, place + ': ' + weather.get_air_accu(aq_url)[1])
+            # bot.send_message(message.chat.id, weather.get_air_quality(place, location['lat'], location['lon'])[1])
 
 
 @bot.inline_handler(lambda query: 'погода' in query.query)
@@ -129,7 +131,7 @@ def query_parkrun(inline_query):
         m3 = types.InlineQueryResultArticle(
             f'{3}', 'Топ 10 волонтёров', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(parkrun.top_volunteers, parse_mode='Markdown'))
-        bot.answer_inline_query(inline_query.id, [m1, m2, m3])#, cache_time=100000)
+        bot.answer_inline_query(inline_query.id, [m1, m2, m3], cache_time=100000)
     except Exception as e:
         print(e)
 

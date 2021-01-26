@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from dotenv import load_dotenv
 import os
 import requests
@@ -56,17 +58,16 @@ def get_place_accu_params(lat, lon):
         "Upgrade-Insecure-Requests": "1",
         "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
     }
-    result = requests.get(url, headers=headers).url.split('/')
-    print(result)
-    return result[-1], result[-4]
+    return requests.get(url, headers=headers).url
 
 
-def get_air_accu(key, name):
+def get_air_accu(url: str):
     pollutant = {'SO 2': 'SO₂', 'PM 2.5': 'PM2.5', 'O 3': 'O₃', 'PM 10': 'PM10', 'NO 2': 'NO₂', 'CO': 'CO'}
     category = {'Fair': '🙂', 'Excellent': '👍', 'Poor': '😐', 'Unhealthy': '🙁', 'Very Unhealthy': '🤢',
                 'Dangerous': '☠'}
     air_index = {'Fair': 2, 'Excellent': 1, 'Poor': 3, 'Unhealthy': 4, 'Very Unhealthy': 5, 'Dangerous': 6}
-    url = f'https://www.accuweather.com/en/en/{name}/{key}/air-quality-index/{key}'
+    url = url.replace('weather-forecast', 'air-quality-index')
+    print(url)
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Encoding": "gzip, deflate, br",
@@ -89,7 +90,7 @@ def get_air_accu(key, name):
             continue
         cat = row.xpath('.//div[@class="category"]')[0].text_content().strip()
         v_aqp = row.xpath('.//div[@class="pollutant-concentration"]')[0].text_content().split()[0]
-        air_description += f', {v_aqp}({pollutant[p]}) {category[cat]}'
+        air_description += f', {v_aqp}({pollutant[p]})-{category[cat]}'
     air_description += ', в µg/m³.'
     return air_index[aqi_category], air_description
 
@@ -103,8 +104,8 @@ if __name__ == '__main__':
     lon = 37.507175
     my_name = 'tyelyatinki'
     my_key = 2442389
-    print(get_place_accu_params(lat, lon))
-    print(get_air_accu(*get_place_accu_params(lat, lon)))
+    get_place_accu_params(lat, lon)
+    print(get_air_accu(get_place_accu_params(lat, lon)))
     # w = get_weather('Test', 43.585472, 39.723089)
     # print(w)
     # a = get_air_quality('Some place', 43.585472, 39.723089)
