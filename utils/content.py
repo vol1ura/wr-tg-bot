@@ -90,7 +90,7 @@ phrases_about_parkrun = [
 instagram_profiles = [
 "i.yadgarov", "marathonecjournal", "across_the_runiverse", "begvreden", "wakeandrun", "runcomrun", "moscowmarathon",
 "goldenringultratrail", "begovoy.monastyr", "diehardrunning", "russiarunning", "stepan_kiselev_run", "rocketscienze",
-"sokslav"
+"sokslav", "trailrunningschool"
 ]
 
 phrases_about_admin = ['Сейчас придёт и разберётся.', 'Не буди лихо!', 'Всех в бан!', 'Модерирует и добавляет.']
