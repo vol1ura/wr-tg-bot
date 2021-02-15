@@ -1,5 +1,6 @@
 import re
 from fuzzywuzzy import process, fuzz
+import pickle
 
 
 def compare(user_phrase, dictionary: list) -> bool:
@@ -15,6 +16,11 @@ def bot_compare(user_phrase, dictionary: list) -> bool:
         return False
 
 
+def best_answer(user_phrase, dictionary: list) -> str:
+    return process.extractOne(re.sub(r'\bбот\b,?', '', user_phrase, re.I).strip(), dictionary,
+                              scorer=fuzz.token_set_ratio)[0]
+
+
 # ======================= DICTIONARIES TO COMPARE =======================================================
 phrases_instagram = [
     'инстаграм бег', 'instagram', 'пишут спортсмены', 'пишут спортивные каналы', 'статья о беге',
@@ -23,7 +29,7 @@ phrases_instagram = [
 
 phrases_admin = [
     'админ', 'тут главный в чате', 'админ чата', 'администратор', 'кто начальник чата', 'контакт админа',
-    "позови админа"
+    "позови админа", 'модератор', "модератор чата"
 ]
 
 phrases_social = [
@@ -43,8 +49,14 @@ phrases_schedule = [
     "расписание", "тренировки клуба", "четверговые", "длительная тренировка"
 ]
 
+with open('utils/message_base.pkl', 'rb') as f:
+    message_base = pickle.load(f)
+
+
 # ===================== TESTING =============================
 if __name__ == '__main__':
+    print(best_answer('бот, администратор', message_base))
+
     phrase1 = 'бот, покажи статью о беге'
     phrase2 = 'Бот, позови администратора'
     phrase3 = 'Бот, покажи ссылки на клуб'
