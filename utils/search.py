@@ -27,7 +27,8 @@ def google(phrase):
     res4 = re.sub(r' Сейчас этот раздел просматривают:.*', '.', res3, re.MULTILINE)
     res5 = re.sub(r'\d\d \w+ \d{2,4}', '', res4)
     res6 = re.sub(r'Сообщение Добавлено: \w{,2} \d{,2} \w+ \d{2,4}, \d\d:\d\d', '', res5)
-    return re.sub(r'[,.!?][\w ]+$', '.', res6.strip(), re.MULTILINE)
+    res7 = re.sub(r'Марафорум|» Соревнования|» Кроссы, трейлы\.|Часовой пояс:|UTC\.|Кто сейчас на форуме\.*', '', res6)
+    return re.sub(r'[,.!?][\w ]+$', '.', res7.strip(), re.MULTILINE)
 
 
 def bashim(phrase):
