@@ -199,6 +199,7 @@ def simple_answers(message):
     elif re.search(r'\bгречк|\bгречневая', message.text, re.I):
         ans = content.phrases_grechka
     else:
+        bot.send_chat_action(message.chat.id, 'typing')
         ans = [search.google(message.text)]
         if not ans[0]:
             ans = [random.choice(content.phrases_about_running)]
