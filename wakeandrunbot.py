@@ -148,7 +148,9 @@ def query_competitions(inline_query):
             else:
                 month += 1
             competitions += news.get_competitions(month, year)
-        queries = []
+        queries = [types.InlineQueryResultArticle(
+                '111', 'Google-таблица стартов и одноклубников', description='Показать ссылку',
+                input_message_content=types.InputTextMessageContent(news.club_calendar(), parse_mode='html'))]
         for i, comp in enumerate(competitions, 1):
             queries.append(types.InlineQueryResultArticle(
                 str(i), comp[0], description=comp[1],

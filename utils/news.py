@@ -35,7 +35,7 @@ def get_competitions(month, year):
             continue
         where = cells[1].text_content()
         if 'отменен' in where.lower() or 'Воронеж' in where or 'Рязань' in where or 'Смоленск' in where or \
-                'Костром' in where or 'Калуж' in where:
+                'Костром' in where or 'Калуж' in where or 'Белгород' in where:
             continue
         kontacts = cells[5].text_content()
         if 'Скоблина' in kontacts or 'alleviate@yandex' in kontacts:
@@ -48,6 +48,12 @@ def get_competitions(month, year):
                       f'\n➡️ <b>Дистанции</b>: {dist}'
         competitions.append((title, when, description))
     return competitions
+
+
+def club_calendar():
+    url = 'https://docs.google.com/spreadsheets/d/1zsvCs9NDFc4DyXJyIzZ4CZ7g2pWqYftncAr4hg8SfzA/edit?usp=sharing'
+    return 'Google-таблица 📅 стартов и участников 🏃\xa0Wake&Run:\n' \
+           f'<a href="{url}">📎\xa0Открыть</a>'
 
 
 if __name__ == '__main__':
