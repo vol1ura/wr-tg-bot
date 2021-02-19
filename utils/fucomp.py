@@ -8,7 +8,7 @@ def compare(user_phrase, dictionary: list) -> bool:
 
 
 def bot_compare(user_phrase, dictionary: list) -> bool:
-    accost_bot = re.compile(r'\bбот\b', re.I)
+    accost_bot = re.compile(r'(?i)\bбот\b')
     user_str = str(user_phrase)
     if accost_bot.search(user_str):
         return process.extractOne(accost_bot.sub('', user_str), dictionary, scorer=fuzz.token_sort_ratio)[1] >= 70
@@ -17,7 +17,7 @@ def bot_compare(user_phrase, dictionary: list) -> bool:
 
 
 def best_answer(user_phrase, dictionary: list) -> str:
-    return process.extractOne(re.sub(r'\bбот\b,?', '', user_phrase, re.I).strip(), dictionary,
+    return process.extractOne(re.sub(r'(?i)\bбот\b,?', '', user_phrase).strip(), dictionary,
                               scorer=fuzz.token_set_ratio)[0]
 
 
@@ -38,7 +38,7 @@ phrases_social = [
 ]
 
 phrases_weather = [
-    'погода на улице', 'информация о погоде', 'прогноз погоды'
+    'погода на улице', 'информация о погоде', 'прогноз погоды', "какая погода"
 ]
 
 phrases_parkrun = [
@@ -46,7 +46,8 @@ phrases_parkrun = [
 ]
 
 phrases_schedule = [
-    "расписание", "тренировки клуба", "четверговые", "длительная тренировка"
+    "расписание", "тренировки клуба", "четверговые", "длительная тренировка", "расписание тренировок",
+    "когда тренировка"
 ]
 
 with open('utils/message_base.pkl', 'rb') as f:
@@ -55,7 +56,9 @@ with open('utils/message_base.pkl', 'rb') as f:
 
 # ===================== TESTING =============================
 if __name__ == '__main__':
-    print(best_answer('бот, администратор', message_base))
+    with open('message_base.pkl', 'rb') as f:
+        message_base = pickle.load(f)
+    print(best_answer('бот, знаешь девиз клуба?', message_base))
 
     phrase1 = 'бот, покажи статью о беге'
     phrase2 = 'Бот, позови администратора'
