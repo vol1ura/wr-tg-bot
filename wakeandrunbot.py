@@ -180,9 +180,9 @@ def get_instagram_post(message):
 @bot.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
 def simple_answers(message):
     ans = []
-    if 'как' in message.text and re.search('\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
+    if 'как' in message.text and re.search(r'\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
         ans = content.phrases_about_myself
-    elif re.search('привет|hi|hello|здравствуй', message.text, re.I):
+    elif re.search(r'привет|\bhi\b|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
         ans = [s.format(user) for s in content.greeting]
     elif fucomp.bot_compare(message.text, fucomp.phrases_parkrun):

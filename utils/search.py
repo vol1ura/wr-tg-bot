@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 
 def google(phrase):
-    search_phrase = re.sub(r'бот|\.|,|!', '', phrase, re.I)
+    search_phrase = re.sub(r'(?i)бот|\.|,|!', '', phrase).strip()
     params = {
         "q": f"{search_phrase}",
         "key": f"{os.environ.get('GOOGLE_API_KEY')}",
@@ -33,7 +33,7 @@ def google(phrase):
 
 
 def bashim(phrase):
-    search_phrase = re.sub(r'бот|\.|,|!|\?', '', phrase, re.I).strip()
+    search_phrase = re.sub(r'(?i)\bбот\b|\.|,|!|\?', '', phrase).strip()
     params = {
         "text": f"{search_phrase}"
     }
