@@ -50,15 +50,18 @@ phrases_schedule = [
     "когда тренировка"
 ]
 
-with open('utils/message_base.pkl', 'rb') as f:
-    message_base = pickle.load(f)
+with open('utils/message_base_wr.pkl', 'rb') as f:
+    message_base_wr = pickle.load(f)
+
+with open('utils/message_base_meschch.pkl', 'rb') as f:
+    message_base_m = pickle.load(f)
 
 
 # ===================== TESTING =============================
 if __name__ == '__main__':
-    with open('message_base.pkl', 'rb') as f:
-        message_base = pickle.load(f)
-    print(best_answer('бот, знаешь девиз клуба?', message_base))
+    with open('message_base_wr.pkl', 'rb') as f:
+        message_base_wr = pickle.load(f)
+    print(best_answer('бот, знаешь девиз?', message_base_wr))
 
     phrase1 = 'бот, покажи статью о беге'
     phrase2 = 'Бот, позови администратора'

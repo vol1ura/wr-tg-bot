@@ -203,7 +203,8 @@ def simple_answers(message):
         ans = [search.google(message.text)]
         if not ans[0]:
             ans = [random.choice(content.phrases_about_running)]
-        ans.append(fucomp.best_answer(message.text, fucomp.message_base))
+        ans.append(fucomp.best_answer(message.text, fucomp.message_base_wr))
+        ans.append(fucomp.best_answer(message.text, fucomp.message_base_m))
     bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 
