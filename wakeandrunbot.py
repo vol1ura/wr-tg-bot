@@ -129,7 +129,7 @@ def query_parkrun(inline_query):
         m3 = types.InlineQueryResultArticle(
             f'{3}', 'Топ 10 волонтёров', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(parkrun.top_volunteers, parse_mode='Markdown'))
-        bot.answer_inline_query(inline_query.id, [m1, m2, m3], cache_time=100000)
+        bot.answer_inline_query(inline_query.id, [m1, m2, m3], cache_time=300)
     except Exception as e:
         print(e)
 
@@ -155,7 +155,7 @@ def query_competitions(inline_query):
             queries.append(types.InlineQueryResultArticle(
                 str(i), comp[0], description=comp[1],
                 input_message_content=types.InputTextMessageContent(comp[2], parse_mode='html')))
-        bot.answer_inline_query(inline_query.id, queries, cache_time=600000)
+        bot.answer_inline_query(inline_query.id, queries, cache_time=30000)
     except Exception as e:
         print(e)
 
