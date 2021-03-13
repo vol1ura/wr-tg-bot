@@ -60,7 +60,7 @@ def get_kuzminki_fans():
         reset_index(drop=True).head(10)
     sportsmens = table[table.columns[0]]
     pr_num = table[table.columns[1]]
-    message = 'Наибольшее количество забегов *в Кузьминках*:\n'
+    message = 'Наибольшее количество забегов _в Кузьминках_:\n'
     for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
     return message.rstrip()
@@ -79,7 +79,7 @@ def get_wr_purkruners():
         head(10)
     sportsmens = table[table.columns[0]]
     pr_num = table[table.columns[1]]
-    message = 'Рейтинг одноклубников по количеству паркранов:\n'
+    message = 'Рейтинг одноклубников _по количеству паркранов_:\n'
     for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
     return message.rstrip()
@@ -94,10 +94,30 @@ def get_kuzminki_top_results():
     data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
     table = data.drop(data.iloc[:,2:], axis=1).sort_values(by=[data.columns[1]]).reset_index(drop=True).head(10)
     sportsmens = table[table.columns[0]]
-    pr_num = table[table.columns[1]]
+    result = table[table.columns[1]]
     message = 'Самые быстрые одноклубники _на паркране Кузьминки_:\n'
-    for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
+    for i, (name, num) in enumerate(zip(sportsmens, result), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
+    return message.rstrip()
+
+
+def most_slow_parkruns():
+    url = 'https://www.parkrun.ru/results/courserecords/'
+    page_all_results = requests.get(url, headers={
+        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
+    data = pd.read_html(page_all_results.text)[0]
+    data.drop(data.columns[[1, 5]], axis=1, inplace=True)
+    data.rename(columns={data.columns[0][0]: 'Parkrun'}, inplace=True)
+    table = data.drop(data.iloc[:, 1:5], axis=1)\
+        .drop(data.columns[6], axis=1)\
+        .sort_values(by=[data.columns[5]], ascending=False)\
+        .reset_index(drop=True)\
+        .head(10)
+    parkrun = table[table.columns[0]]
+    result = table[table.columns[1]]
+    message = '10 самых медленных паркранов:\n'
+    for i, (name, num) in enumerate(zip(parkrun, result), 1):
+        message += f'{i:>2}.\xa0{name:<25}\xa0*{num:<3}*\n'
     return message.rstrip()
 
 
@@ -117,5 +137,5 @@ def get_club():
 
 if __name__ == '__main__':
     # mes = get_participants()
-    mes = get_kuzminki_top_results()
+    mes = most_slow_parkruns()
     print(mes)

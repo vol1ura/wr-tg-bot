@@ -138,7 +138,10 @@ def query_parkrun(inline_query):
         m6 = types.InlineQueryResultArticle(
             f'{6}', 'Топ 10 результатов одноклубников', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(parkrun.get_kuzminki_top_results(), parse_mode='Markdown'))
-        bot.answer_inline_query(inline_query.id, [m1, m3, m4, m5, m6, m2], cache_time=0)
+        m7 = types.InlineQueryResultArticle(
+            f'{7}', 'Самые медленные паркраны России', description='по мужским результатам',
+            input_message_content=types.InputTextMessageContent(parkrun.most_slow_parkruns(), parse_mode='Markdown'))
+        bot.answer_inline_query(inline_query.id, [m1, m3, m4, m5, m6, m7, m2], cache_time=600)
     except Exception as e:
         print(e)
 
