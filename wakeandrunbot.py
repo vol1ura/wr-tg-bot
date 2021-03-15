@@ -212,11 +212,15 @@ def simple_answers(message):
         ans = content.phrases_grechka
     else:
         bot.send_chat_action(message.chat.id, 'typing')
-        ans = [search.google(message.text)]
-        if not ans[0]:
-            ans = [random.choice(content.phrases_about_running)]
-        ans.append(fucomp.best_answer(message.text, fucomp.message_base_wr))
-        ans.append(fucomp.best_answer(message.text, fucomp.message_base_m))
+        ans_variant = random.randrange(3)
+        if ans_variant == 0:
+            ans = [search.google(message.text)]
+            if not ans[0]:
+                ans = [random.choice(content.phrases_about_running)]
+        elif ans_variant == 1:
+            ans = [fucomp.best_answer(message.text, fucomp.message_base_wr)]
+        else:
+            ans = [fucomp.best_answer(message.text, fucomp.message_base_m)]
     bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 
