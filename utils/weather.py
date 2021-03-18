@@ -36,9 +36,9 @@ def get_air_quality(place, lat, lon, lang='ru'):
     aqi = aq['list'][0]['main']['aqi']
     aqi_e = ['👍', '🙂', '😐', '🙁', '🤢'][aqi - 1]
     air = {'ru': 'воздух', 'en': 'air'}
-    air_conditions = f"{place}: {air[lang]} {aqi_e} {aq['list'][0]['components']['so2']}(PM2.5), " \
-                     f"{aq['list'][0]['components']['so2']}(SO₂), {aq['list'][0]['components']['no2']}(NO₂), " \
-                     f"{aq['list'][0]['components']['nh3']}(NH₃)."
+    air_conditions = f"{place}: {air[lang]} {aqi_e} PM2.5~{aq['list'][0]['components']['pm2_5']:.0f}, " \
+                     f"SO₂~{aq['list'][0]['components']['so2']:.0f}, NO₂~{aq['list'][0]['components']['no2']:.0f}, " \
+                     f"NH₃~{aq['list'][0]['components']['nh3']:.1f} (в µg/m³)."
     return aqi, air_conditions
 
 
