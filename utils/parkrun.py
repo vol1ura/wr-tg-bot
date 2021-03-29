@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 import re
 import requests
@@ -16,18 +17,7 @@ top_volunteers = """Toп 10 волонтёров parkrun Kuzminki
 9. Сергей КОТЛОВ | 58
 10. Альфия ЗАЙНУТДИНОВА | 55"""
 
-parkrun_headers = {"Accept": "text/html",
-                   "Accept-Encoding": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                   "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-                   "Cache-Control": "max-age=0",
-                   "Connection": "keep-alive",
-                   "Host": "www.parkrun.com",
-                   "Referer": "https://www.parkrun.ru/",
-                   "Sec-GPC": "1",
-                   "TE": "Trailers",
-                   "Upgrade-Insecure-Requests": "1",
-                   "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
-                   }
+parkrun_headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
 
 
 def get_participants():
@@ -49,8 +39,7 @@ def get_participants():
 
 def get_kuzminki_fans():
     url = 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212'
-    page_all_results = requests.get(url, headers={
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
+    page_all_results = requests.get(url, headers=parkrun_headers)
     data = pd.read_html(page_all_results.text)[0]
     data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
     data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
@@ -92,7 +81,7 @@ def get_kuzminki_top_results():
     data = pd.read_html(page_all_results.text)[0]
     data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
     data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
-    table = data.drop(data.iloc[:,2:], axis=1).sort_values(by=[data.columns[1]]).reset_index(drop=True).head(10)
+    table = data.drop(data.iloc[:, 2:], axis=1).sort_values(by=[data.columns[1]]).reset_index(drop=True).head(10)
     sportsmens = table[table.columns[0]]
     result = table[table.columns[1]]
     message = 'Самые быстрые одноклубники _на паркране Кузьминки_:\n'
@@ -115,10 +104,26 @@ def most_slow_parkruns():
         .head(10)
     parkrun = table[table.columns[0]]
     result = table[table.columns[1]]
-    message = '10 самых медленных паркранов:\n'
+    message = '*10 самых медленных паркранов:*\n'
     for i, (name, num) in enumerate(zip(parkrun, result), 1):
         message += f'{i:>2}.\xa0{name:<25}\xa0*{num:<3}*\n'
     return message.rstrip()
+
+
+def get_latest_results_diagram():
+    url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
+    page_all_results = requests.get(url, headers={
+        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
+    data = pd.read_html(page_all_results.text)[0]
+    data = data.dropna(thresh=3)
+    data[data.columns[5]] = data[data.columns[5]].dropna().transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])
+    plt.figure(figsize=(16, 7))
+    ax = data['Время'] \
+        .transform(lambda time: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], time.split(':')[::-1]))) \
+        .hist(bins=30)
+    ax.set_xlabel("Результаты участников (минуты)", size=14)
+    ax.set_ylabel("Результатов в диапазоне")
+    plt.savefig('../static/results.png')
 
 
 def get_club():
@@ -137,5 +142,7 @@ def get_club():
 
 if __name__ == '__main__':
     # mes = get_participants()
-    mes = most_slow_parkruns()
-    print(mes)
+    # mes = most_slow_parkruns()
+    # print(mes)
+    # get_latest_results_diagram()
+    print(most_slow_parkruns())
