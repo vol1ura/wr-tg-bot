@@ -157,12 +157,10 @@ def post_parkrun_info(message):
                          parse_mode='Markdown',
                          disable_web_page_preview=True)
     elif 'диаграммы' in message.text:
-        pic = os.path.join(os.path.abspath(os.path.curdir), 'static/results.png')
-        parkrun.make_latest_results_diagram(pic)
-        logger.info('pic created ' + pic)
-        logger.info(f'pis is exists: {os.path.exists(pic)}')
-        with open(pic, 'rb') as f:
-            bot.send_photo(message.chat.id, f)
+        pic = parkrun.make_latest_results_diagram('results.png')
+        logger.info(f'pis is exists: {os.path.exists("results.png")}')
+        bot.send_photo(message.chat.id, pic)
+        pic.close()
     elif 'о количестве стартов в Кузьминках' in message.text:
         bot.send_message(message.chat.id, parkrun.get_kuzminki_fans(), parse_mode='Markdown')
     elif 'о количестве всех стартов' in message.text:

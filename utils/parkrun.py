@@ -120,6 +120,7 @@ def make_latest_results_diagram(pic: str):
     ax.set_xlabel("Результаты участников (минуты)", size=14)
     ax.set_ylabel("Результатов в диапазоне")
     plt.savefig(pic)
+    return open(pic, 'rb')
 
 
 if __name__ == '__main__':
