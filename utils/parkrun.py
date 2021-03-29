@@ -4,6 +4,7 @@ import re
 import requests
 from lxml.html import parse
 
+club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
 
 top_volunteers = """Toп 10 волонтёров parkrun Kuzminki
 1. Максим СИЛАЕВ | 156
@@ -37,11 +38,16 @@ def get_participants():
     return message
 
 
-def get_kuzminki_fans():
+def get_club_table():
     url = 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212'
     page_all_results = requests.get(url, headers=parkrun_headers)
     data = pd.read_html(page_all_results.text)[0]
     data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
+    return data
+
+
+def get_kuzminki_fans():
+    data = get_club_table()
     data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
     table = data.drop(data.iloc[:, 1:7], axis=1).\
         drop(data.columns[8], axis=1).\
@@ -56,13 +62,9 @@ def get_kuzminki_fans():
 
 
 def get_wr_purkruners():
-    url = 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212'
-    page_all_results = requests.get(url, headers={
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
-    data = pd.read_html(page_all_results.text)[0]
-    data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
+    data = get_club_table()
     data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
-    table = data.drop(data.iloc[:,1:8], axis=1).\
+    table = data.drop(data.iloc[:, 1:8], axis=1).\
         sort_values(by=[data.columns[8]], ascending=False).\
         reset_index(drop=True).\
         head(10)
@@ -75,11 +77,7 @@ def get_wr_purkruners():
 
 
 def get_kuzminki_top_results():
-    url = 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212'
-    page_all_results = requests.get(url, headers={
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
-    data = pd.read_html(page_all_results.text)[0]
-    data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
+    data = get_club_table()
     data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
     table = data.drop(data.iloc[:, 2:], axis=1).sort_values(by=[data.columns[1]]).reset_index(drop=True).head(10)
     sportsmens = table[table.columns[0]]
@@ -92,8 +90,7 @@ def get_kuzminki_top_results():
 
 def most_slow_parkruns():
     url = 'https://www.parkrun.ru/results/courserecords/'
-    page_all_results = requests.get(url, headers={
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
+    page_all_results = requests.get(url, headers=parkrun_headers)
     data = pd.read_html(page_all_results.text)[0]
     data.drop(data.columns[[1, 5]], axis=1, inplace=True)
     data.rename(columns={data.columns[0][0]: 'Parkrun'}, inplace=True)
@@ -112,8 +109,7 @@ def most_slow_parkruns():
 
 def make_latest_results_diagram(pic: str):
     url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
-    page_all_results = requests.get(url, headers={
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
+    page_all_results = requests.get(url, headers=parkrun_headers)
     data = pd.read_html(page_all_results.text)[0]
     data = data.dropna(thresh=3)
     data[data.columns[5]] = data[data.columns[5]].dropna().transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])
@@ -124,20 +120,6 @@ def make_latest_results_diagram(pic: str):
     ax.set_xlabel("Результаты участников (минуты)", size=14)
     ax.set_ylabel("Результатов в диапазоне")
     plt.savefig(pic)
-
-
-def get_club():
-    # session = requests.Session()
-    # result = session.get('https://www.parkrun.ru/groups/23212/', headers=headers)#, stream=True)
-    return '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
-    # result.raw.decode_content = True
-    # tree = parse(result.raw)
-    # with open('parkrun1.html', 'w') as f:
-    #     f.write(result.text)
-    # n = tree.xpath('//div[@id="vue-public-group"]/p')
-    # print(n)
-
-# https://www.parkrun.ru/results/courserecords/
 
 
 if __name__ == '__main__':

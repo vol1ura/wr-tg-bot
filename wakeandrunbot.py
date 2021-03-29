@@ -20,7 +20,7 @@ if os.path.exists(dotenv_path):
 TOKEN_BOT = os.environ.get('API_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN_BOT)
 logger = telebot.logger
-telebot.logger.setLevel(logging.WARNING)  # Outputs debug messages to console.
+telebot.logger.setLevel(logging.INFO)  # Outputs debug messages to console.
 
 
 @bot.message_handler(commands=['start'])
@@ -118,44 +118,59 @@ def query_air(inline_query):
 @bot.inline_handler(lambda query: 'паркран' in query.query or 'parkrun' in query.query)
 def query_parkrun(inline_query):
     try:
+        pattern = '⏳ Получение данных '
         m1 = types.InlineQueryResultArticle(
             f'{1}', 'Где бегали наши одноклубники?', description='перечень паркранов',
-            input_message_content=types.InputTextMessageContent(parkrun.get_participants(),
-                                                                parse_mode='Markdown', disable_web_page_preview=True))
+            input_message_content=types.InputTextMessageContent(pattern + 'об участии...'))
         m2 = types.InlineQueryResultArticle(
             f'{2}', 'Как установить клуб в parkrun?', description='ссылка на клуб Wake&Run',
-            input_message_content=types.InputTextMessageContent(parkrun.get_club(),
+            input_message_content=types.InputTextMessageContent(parkrun.club_link,
                                                                 parse_mode='Markdown', disable_web_page_preview=True))
         m3 = types.InlineQueryResultArticle(
             f'{3}', 'Топ 10 волонтёров', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(parkrun.top_volunteers, parse_mode='Markdown'))
         m4 = types.InlineQueryResultArticle(
             f'{4}', 'Топ 10 одноклубников по числу забегов', description='на паркране Кузьминки',
-            input_message_content=types.InputTextMessageContent(parkrun.get_kuzminki_fans(), parse_mode='Markdown'))
+            input_message_content=types.InputTextMessageContent(pattern + 'о количестве стартов в Кузьминках...'))
         m5 = types.InlineQueryResultArticle(
             f'{5}', 'Топ 10 одноклубников по количеству паркранов', description='по всем паркранам',
-            input_message_content=types.InputTextMessageContent(parkrun.get_wr_purkruners(), parse_mode='Markdown'))
+            input_message_content=types.InputTextMessageContent(pattern + 'о количестве всех стартов...'))
         m6 = types.InlineQueryResultArticle(
             f'{6}', 'Топ 10 результатов одноклубников', description='на паркране Кузьминки',
-            input_message_content=types.InputTextMessageContent(parkrun.get_kuzminki_top_results(), parse_mode='Markdown'))
+            input_message_content=types.InputTextMessageContent(pattern + 'о рекордах...'))
         m7 = types.InlineQueryResultArticle(
             f'{7}', 'Самые медленные паркраны России', description='по мужским результатам',
-            input_message_content=types.InputTextMessageContent(parkrun.most_slow_parkruns(), parse_mode='Markdown'))
+            input_message_content=types.InputTextMessageContent(pattern + 'о российских паркранах'))
         m8 = types.InlineQueryResultArticle(
             f'{8}', 'Диаграмма с последними результатами', description='на паркране Кузьминки',
-            input_message_content=types.InputTextMessageContent('Расчёт диаграммы... секундочку...'))
-        bot.answer_inline_query(inline_query.id, [m1, m3, m8, m4, m5, m6, m7, m2], cache_time=0)
+            input_message_content=types.InputTextMessageContent(pattern + 'и расчёт диаграммы...'))
+        bot.answer_inline_query(inline_query.id, [m1, m3, m8, m4, m5, m6, m7, m2], cache_time=0)  # FIXME: after debug
     except Exception as e:
         print(e)
 
 
-@bot.message_handler(regexp='Расчёт диаграммы... секундочку...', content_types=['text'])
-def post_parkrun_diagram(message):
-    pic = os.path.join(os.path.abspath(os.path.curdir), 'static/results.png')
-    parkrun.make_latest_results_diagram(pic)
-    print('CREATED', pic)
-    with open(pic, 'rb') as f:
-        bot.send_photo(message.chat.id, f)
+@bot.message_handler(regexp='⏳ Получение данных', content_types=['text'])
+def post_parkrun_info(message):
+    if 'об участии' in message.text:
+        bot.send_message(message.chat.id,
+                         parkrun.get_participants(),
+                         parse_mode='Markdown',
+                         disable_web_page_preview=True)
+    elif 'диаграммы' in message.text:
+        pic = os.path.join(os.path.abspath(os.path.curdir), 'static/results.png')
+        parkrun.make_latest_results_diagram(pic)
+        logger.info('pic created ' + pic)
+        logger.info(f'pis is exists: {os.path.exists(pic)}')
+        with open(pic, 'rb') as f:
+            bot.send_photo(message.chat.id, f)
+    elif 'о количестве стартов в Кузьминках' in message.text:
+        bot.send_message(message.chat.id, parkrun.get_kuzminki_fans(), parse_mode='Markdown')
+    elif 'о количестве всех стартов' in message.text:
+        bot.send_message(message.chat.id, parkrun.get_wr_purkruners(), parse_mode='Markdown')
+    elif 'о рекордах' in message.text:
+        bot.send_message(message.chat.id, parkrun.get_kuzminki_top_results(), parse_mode='Markdown')
+    elif 'о российских паркранах' in message.text:
+        bot.send_message(message.chat.id, parkrun.most_slow_parkruns(), parse_mode='Markdown')
     bot.delete_message(message.chat.id, message.id)
 
 
