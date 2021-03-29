@@ -110,7 +110,7 @@ def most_slow_parkruns():
     return message.rstrip()
 
 
-def get_latest_results_diagram():
+def make_latest_results_diagram(pic: str):
     url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
     page_all_results = requests.get(url, headers={
         'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
@@ -123,7 +123,7 @@ def get_latest_results_diagram():
         .hist(bins=30)
     ax.set_xlabel("Результаты участников (минуты)", size=14)
     ax.set_ylabel("Результатов в диапазоне")
-    plt.savefig('../static/results.png')
+    plt.savefig(pic)
 
 
 def get_club():

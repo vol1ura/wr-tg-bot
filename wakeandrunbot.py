@@ -141,9 +141,22 @@ def query_parkrun(inline_query):
         m7 = types.InlineQueryResultArticle(
             f'{7}', 'Самые медленные паркраны России', description='по мужским результатам',
             input_message_content=types.InputTextMessageContent(parkrun.most_slow_parkruns(), parse_mode='Markdown'))
-        bot.answer_inline_query(inline_query.id, [m1, m3, m4, m5, m6, m7, m2], cache_time=600)
+        m8 = types.InlineQueryResultArticle(
+            f'{8}', 'Диаграмма с последними результатами', description='на паркране Кузьминки',
+            input_message_content=types.InputTextMessageContent('Расчёт диаграммы... секундочку...'))
+        bot.answer_inline_query(inline_query.id, [m1, m3, m8, m4, m5, m6, m7, m2], cache_time=0)
     except Exception as e:
         print(e)
+
+
+@bot.message_handler(regexp='Расчёт диаграммы... секундочку...', content_types=['text'])
+def post_parkrun_diagram(message):
+    pic = os.path.join(os.path.abspath(os.path.curdir), 'static/results.png')
+    parkrun.make_latest_results_diagram(pic)
+    print('CREATED', pic)
+    with open(pic, 'rb') as f:
+        bot.send_photo(message.chat.id, f)
+    bot.delete_message(message.chat.id, message.id)
 
 
 @bot.inline_handler(lambda query: re.search(r'соревнован|старт|забег', query.query))
