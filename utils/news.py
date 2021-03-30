@@ -26,12 +26,12 @@ def get_competitions(month, year):
     tree = parse(result.raw)
     rows = tree.xpath('//table[@class="textU"]/tr')[1:]
     competitions = []
-    from_date = time.localtime(time.time()).tm_mday
+    from_date = time.localtime(time.time())
     for row in rows:
         cells = row.xpath('.//td')
         when = cells[2].text_content().strip()
-        day = int(when[:2])
-        if day < from_date:
+        to_date = time.strptime(f'{when[:2]}.{when[-2:]}.{year}', '%d.%m.%Y')
+        if to_date < from_date:
             continue
         where = cells[1].text_content()
         if 'отменен' in where.lower() or 'Воронеж' in where or 'Рязань' in where or 'Смоленск' in where or \
@@ -57,5 +57,5 @@ def club_calendar():
 
 
 if __name__ == '__main__':
-    a = get_competitions(1, 2021)
-    # print(a)
+    a = get_competitions(4, 2021)
+    print(a)
