@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import re
 import requests
-from lxml.html import parse
+from lxml.html import parse, fromstring
 
 club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
 
@@ -110,15 +110,19 @@ def most_slow_parkruns():
 def make_latest_results_diagram(pic: str):
     url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
     page_all_results = requests.get(url, headers=parkrun_headers)
-    data = pd.read_html(page_all_results.text)[0]
+    html_page = page_all_results.text
+    tree = fromstring(html_page)
+    parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
+    data = pd.read_html(html_page)[0]
     data = data.dropna(thresh=3)
     data[data.columns[5]] = data[data.columns[5]].dropna().transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])
     plt.figure(figsize=(16, 7))
     ax = data['Время'] \
         .transform(lambda time: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], time.split(':')[::-1]))) \
-        .hist(bins=30)
-    ax.set_xlabel("Результаты участников (минуты)", size=14)
-    ax.set_ylabel("Результатов в диапазоне")
+        .hist(bins=32)
+    ax.set_xlabel("Результаты участников (минуты)", size=12)
+    ax.set_ylabel("Результатов в диапазоне", size=12)
+    plt.title(f'Результаты паркрана Кузьминки {parkrun_date}', size=16)
     plt.savefig(pic)
     return open(pic, 'rb')
 
@@ -128,4 +132,4 @@ if __name__ == '__main__':
     # mes = most_slow_parkruns()
     # print(mes)
     # get_latest_results_diagram()
-    print(most_slow_parkruns())
+    make_latest_results_diagram('../utils/results.png').close()
