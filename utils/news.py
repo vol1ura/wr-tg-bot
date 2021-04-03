@@ -9,16 +9,8 @@ def get_competitions(month, year):
               f'%F1select=%D0%EE%F1%F1%E8%FF&datenum=000&datemon=000&np=YES&' \
               f'fedokr=&countr=&Vidp=0&oblsubmit=%E2%FB%E1%F0%E0%F2%FC'
     headers = {"Accept": "text/html",
-               "Accept-Encoding": "gzip, deflate, br",
-               "Accept-Language": "ru-RU",
-               "Connection": "keep-alive",
                "Content-Type": "application/x-www-form-urlencoded",
                "Cookie": "hotlog=1",
-               "Host": "probeg.org",
-               "Origin": "https://probeg.org",
-               "Referer": "https://probeg.org/kalend/kalend.php",
-               "Sec-GPC": "1",
-               "Upgrade-Insecure-Requests": "1",
                "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
                }
     result = requests.post('https://probeg.org/kalend/kalend.php', data=payload, headers=headers, stream=True)
