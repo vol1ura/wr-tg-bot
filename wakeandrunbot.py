@@ -137,7 +137,7 @@ def query_parkrun(inline_query):
                                                                 parse_mode='Markdown', disable_web_page_preview=True))
         m3 = types.InlineQueryResultArticle(
             f'{3}', 'Топ 10 волонтёров', description='на паркране Кузьминки',
-            input_message_content=types.InputTextMessageContent(parkrun.top_volunteers, parse_mode='Markdown'))
+            input_message_content=types.InputTextMessageContent(pattern + 'о волонтёрах.', parse_mode='Markdown'))
         m4 = types.InlineQueryResultArticle(
             f'{4}', 'Топ 10 одноклубников по числу забегов', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'о количестве стартов в Кузьминках...'))
@@ -153,13 +153,17 @@ def query_parkrun(inline_query):
         m8 = types.InlineQueryResultArticle(
             f'{8}', 'Гистограмма с последними результатами', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'и расчёт диаграммы...'))
-        bot.answer_inline_query(inline_query.id, [m1, m3, m8, m4, m5, m6, m7, m2], cache_time=100_000)
+        m9 = types.InlineQueryResultArticle(
+            f'{9}', 'Диаграмма с распределением по клубам', description='на паркране Кузьминки',
+            input_message_content=types.InputTextMessageContent(pattern + 'о клубах...'))
+        bot.answer_inline_query(inline_query.id, [m1, m3, m8, m9, m4, m5, m6, m7, m2], cache_time=10000)
     except Exception as e:
         logger.error(e)
 
 
 @bot.message_handler(regexp='⏳ Получение данных', content_types=['text'])
 def post_parkrun_info(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if 'об участии' in message.text:
         bot.send_message(message.chat.id,
                          parkrun.get_participants(),
@@ -167,7 +171,7 @@ def post_parkrun_info(message):
                          disable_web_page_preview=True)
     elif 'диаграммы' in message.text:
         pic = parkrun.make_latest_results_diagram('results.png')
-        logger.info(f'pis is exists: {os.path.exists("results.png")}')
+        logger.info(f'piс is exists: {os.path.exists("results.png")}')
         bot.send_photo(message.chat.id, pic)
         pic.close()
     elif 'о количестве стартов в Кузьминках' in message.text:
@@ -178,6 +182,12 @@ def post_parkrun_info(message):
         bot.send_message(message.chat.id, parkrun.get_kuzminki_top_results(), parse_mode='Markdown')
     elif 'о российских паркранах' in message.text:
         bot.send_message(message.chat.id, parkrun.most_slow_parkruns(), parse_mode='Markdown')
+    elif 'о волонтёрах' in message.text:
+        bot.send_message(message.chat.id, parkrun.get_volunteers(), parse_mode='Markdown')
+    elif 'о клубах...' in message.text:
+        pic = parkrun.make_clubs_bar('clubs.png')
+        logger.info(f'piс is exists: {os.path.exists("clubs.png")}')
+        bot.send_photo(message.chat.id, pic)
     bot.delete_message(message.chat.id, message.id)
 
 

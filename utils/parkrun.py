@@ -4,21 +4,51 @@ import re
 import requests
 from lxml.html import parse, fromstring
 
+parkrun_headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
+
 club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
 
-top_volunteers = """Toп 10 волонтёров parkrun Kuzminki
-1. Максим СИЛАЕВ | 156
-2. Янчик КРЖИЖАНОВСКАЯ | 125
-3. Александр ЩЁЛОКОВ | 119
-4. Ольга АКИМОВА | 100
-5. Наталия ДУЛЕБЕНЕЦ | 92
-6. Андрей ЛЕТУНОВСКИЙ | 84
-7. Оксана ГАМЗИНА | 71
-8. Анастасия КАЗАНЦЕВА | 69
-9. Сергей КОТЛОВ | 58
-10. Альфия ЗАЙНУТДИНОВА | 55"""
 
-parkrun_headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
+def add_volunteers(start, stop):
+    url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
+    parkrun_number = start
+    while parkrun_number <= stop:
+        result = requests.get(url + str(parkrun_number), headers=parkrun_headers, stream=True)
+        result.raw.decode_content = True
+        tree = parse(result.raw)
+        volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
+        with open('static/kuzminki_full_stat.txt', 'a') as f:
+            for volunteer in volunteers:
+                volunteer_name = volunteer.text_content()
+                volunteer_id = re.search(r'\d+', volunteer.attrib['href'])[0]
+                f.write(f'kuzminki\t{parkrun_number}\tA{volunteer_id} {volunteer_name}\n')
+        parkrun_number += 1
+
+
+def get_volunteers():
+    url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
+    result = requests.get(url, headers=parkrun_headers, stream=True)
+    result.raw.decode_content = True
+    tree = parse(result.raw)
+    parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
+    with open('static/kuzminki_full_stat.txt', 'r') as f:
+        all_stat = f.readlines()
+    last_parkrun_db = int(all_stat[-2].split()[1])
+    if last_parkrun_db < parkrun_number:
+        add_volunteers(last_parkrun_db + 1, parkrun_number)
+        with open('static/kuzminki_full_stat.txt', 'r') as f:
+            all_stat = f.readlines()
+    volunteers = {}
+    for line in all_stat:
+        name = line.split(maxsplit=3)[-1].strip()
+        volunteers[name] = volunteers.setdefault(name, 0) + 1
+
+    top_volunteers = sorted(volunteers.items(), key=lambda v: v[1], reverse=True)[:10]
+    result = '*Toп 10 волонтёров parkrun Kuzminki*\n'
+    for i, volunteer in enumerate(top_volunteers, 1):
+        result += f'{i}. {volunteer[0]} | {volunteer[1]}\n'
+
+    return result.strip()
 
 
 def get_participants():
@@ -127,9 +157,31 @@ def make_latest_results_diagram(pic: str):
     return open(pic, 'rb')
 
 
+def make_clubs_bar(pic: str):
+    url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
+    page_all_results = requests.get(url, headers=parkrun_headers)
+    html_page = page_all_results.text
+    tree = fromstring(html_page)
+    parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
+    data = pd.read_html(html_page)[0]
+    data = data.dropna(thresh=3)
+
+    clubs = data['Клуб'].value_counts()
+    x = clubs.index
+    colors = [('blueviolet' if item == 'Wake&Run' else 'darkkhaki') for item in x]
+    plt.figure(figsize=(16, 7))
+    plt.xticks(rotation=20)
+    plt.bar(x, clubs.values, color=colors)
+    plt.title(f'Количество участников из клубов на паркране Кузьминки {parkrun_date}', size=16)
+    plt.savefig(pic)
+    return open(pic, 'rb')
+
+
 if __name__ == '__main__':
     # mes = get_participants()
     # mes = most_slow_parkruns()
     # print(mes)
     # get_latest_results_diagram()
-    make_latest_results_diagram('../utils/results.png').close()
+    # make_latest_results_diagram('../utils/results.png').close()
+    # add_volunteers(204, 204)
+    make_clubs_bar('../utils/clubs.png').close()
