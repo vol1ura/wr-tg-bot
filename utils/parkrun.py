@@ -119,7 +119,7 @@ def make_latest_results_diagram(pic: str):
     plt.figure(figsize=(16, 7))
     ax = data['Время'] \
         .transform(lambda time: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], time.split(':')[::-1]))) \
-        .hist(bins=32)
+        .hist(bins=32, color='darkolivegreen')
     ax.set_xlabel("Результаты участников (минуты)", size=12)
     ax.set_ylabel("Результатов в диапазоне", size=12)
     plt.title(f'Результаты паркрана Кузьминки {parkrun_date}', size=16)

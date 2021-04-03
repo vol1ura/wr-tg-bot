@@ -3,11 +3,10 @@ import os
 import random
 import re
 import time
-from geopy.geocoders import Nominatim
-
-from dotenv import load_dotenv
 
 import telebot
+from dotenv import load_dotenv
+from geopy.geocoders import Nominatim
 # https://api.telegram.org/{TOKEN}/getMe
 from telebot import types
 
@@ -62,14 +61,24 @@ def schedule(message):
 
 @bot.message_handler(commands=['help', 'помощь', 'команды', 'справка'])
 def commands(message):
-    bot.send_message(message.chat.id, """Я понимаю следующие команды:
+    bot_nick = bot.get_me().to_dict()["username"]
+    bot.send_message(message.chat.id, f"""Я понимаю следующие команды:
     📆 /schedule, /расписание - расписание тренировок
     📱 /social, /соцсети - Wake&Run в соцсетях
     👤 /admin, /админ - администраторы чата
     🤖 /about, /оботе - информация о боте
     ❓ /help, /помощь, /справка, /команды - данное сообщение
-    Есть inline режим запросов.
-    Кроме того, со мной можно просто поболтать.""", disable_notification=True)
+    Есть inline режим запросов - наберите в поле ввода сообщения @{bot_nick} <запрос> (примеры):
+    @{bot_nick} погода
+    @{bot_nick} паркран
+    @{bot_nick} воздух
+    @{bot_nick} старты
+    Через пару секунд появится меню, из которого можно выбрать нужный вариант информации.
+    Про погоду и воздух можно также спросить напрямую, например, "Бот, погода Москва Кузьминки".
+    Если отправлять сообщения "Бот паркран",  "Бот, инстаграм", бот будет находить картинки или новости.
+    Бот не чувствителен к знакам пунктуации, регистру букв, и, в большинстве случаев, к порядку фраз. 
+    Кроме того, с ботом можно просто поболтать - отправьте сообщение, начинающееся словом бот.""",
+                     disable_notification=True)
 
 
 @bot.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
@@ -100,7 +109,7 @@ def query_weather(inline_query):
             for k, v in content.places.items()]
         bot.answer_inline_query(inline_query.id, places_weather, cache_time=3000)
     except Exception as e:
-        print(e)
+        logger.error(e)
 
 
 @bot.inline_handler(lambda query: 'воздух' in query.query)
@@ -112,7 +121,7 @@ def query_air(inline_query):
             for k, v in content.places.items()]
         bot.answer_inline_query(inline_query.id, places_air, cache_time=3000)
     except Exception as e:
-        print(e)
+        logger.error(e)
 
 
 @bot.inline_handler(lambda query: 'паркран' in query.query or 'parkrun' in query.query)
@@ -142,11 +151,11 @@ def query_parkrun(inline_query):
             f'{7}', 'Самые медленные паркраны России', description='по мужским результатам',
             input_message_content=types.InputTextMessageContent(pattern + 'о российских паркранах'))
         m8 = types.InlineQueryResultArticle(
-            f'{8}', 'Диаграмма с последними результатами', description='на паркране Кузьминки',
+            f'{8}', 'Гистограмма с последними результатами', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'и расчёт диаграммы...'))
-        bot.answer_inline_query(inline_query.id, [m1, m3, m8, m4, m5, m6, m7, m2], cache_time=0)  # FIXME: after debug
+        bot.answer_inline_query(inline_query.id, [m1, m3, m8, m4, m5, m6, m7, m2], cache_time=100_000)
     except Exception as e:
-        print(e)
+        logger.error(e)
 
 
 @bot.message_handler(regexp='⏳ Получение данных', content_types=['text'])
@@ -178,7 +187,7 @@ def query_competitions(inline_query):
         date = time.gmtime(time.time())
         month, year = date.tm_mon, date.tm_year
         competitions = news.get_competitions(month, year)
-        print(len(competitions))
+        logger.info(str(len(competitions)))
         if len(competitions) < 10:
             if month == 12:
                 month = 1
@@ -187,15 +196,15 @@ def query_competitions(inline_query):
                 month += 1
             competitions += news.get_competitions(month, year)
         queries = [types.InlineQueryResultArticle(
-                '111', 'Google-таблица стартов и одноклубников', description='Показать ссылку',
-                input_message_content=types.InputTextMessageContent(news.club_calendar(), parse_mode='html'))]
+            '111', 'Google-таблица стартов и одноклубников', description='Показать ссылку',
+            input_message_content=types.InputTextMessageContent(news.club_calendar(), parse_mode='html'))]
         for i, comp in enumerate(competitions, 1):
             queries.append(types.InlineQueryResultArticle(
                 str(i), comp[0], description=comp[1],
                 input_message_content=types.InputTextMessageContent(comp[2], parse_mode='html')))
         bot.answer_inline_query(inline_query.id, queries, cache_time=30000)
     except Exception as e:
-        print(e)
+        logger.error(e)
 
 
 @bot.message_handler(regexp=r'(?i)бот,? (паркран|parkrun)', content_types=['text'])
@@ -230,7 +239,8 @@ def simple_answers(message):
         bot.reply_to(message, random.choice(ans), disable_web_page_preview=True)
         return
     elif 'погода' in message.text:
-        ans = ['Информацию о погоде можно получить через inline запрос: в строке сообщений наберите "@имябота погода".'
+        bot_nick = bot.get_me().to_dict()["username"]
+        ans = [f'Информацию о погоде можно получить через inline запрос: в строке сообщений наберите "@{bot_nick} погода".'
                'Либо, набрав сообщение, "Бот, погода Населённый пункт", например, "Бот, погода Кузьминки Москва".']
     elif re.search(r'GRUT|ГРУТ', message.text, re.I):
         ans = content.phrases_grut
