@@ -153,6 +153,7 @@ def make_latest_results_diagram(pic: str):
     ax.set_xlabel("Результаты участников (минуты)", size=12)
     ax.set_ylabel("Результатов в диапазоне", size=12)
     plt.title(f'Результаты паркрана Кузьминки {parkrun_date}', size=16)
+    plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
 
@@ -170,9 +171,10 @@ def make_clubs_bar(pic: str):
     x = clubs.index
     colors = [('blueviolet' if item == 'Wake&Run' else 'darkkhaki') for item in x]
     plt.figure(figsize=(16, 7))
-    plt.xticks(rotation=20)
+    plt.xticks(rotation=70)
     plt.bar(x, clubs.values, color=colors)
     plt.title(f'Количество участников из клубов на паркране Кузьминки {parkrun_date}', size=16)
+    plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
 
