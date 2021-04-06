@@ -67,18 +67,19 @@ def commands(message):
     📱 /social, /соцсети - Wake&Run в соцсетях
     👤 /admin, /админ - администраторы чата
     🤖 /about, /оботе - информация о боте
-    ❓ /help, /помощь, /справка, /команды - данное сообщение
-    Есть inline режим запросов - наберите в поле ввода сообщения @{bot_nick} <запрос> (примеры):
+    ❓ /help, /помощь, /справка, /команды - _данное сообщение_
+    Есть *inline* режим запросов - наберите в поле ввода сообщения @{bot_nick} <запрос> (примеры):
     @{bot_nick} погода
     @{bot_nick} паркран
     @{bot_nick} воздух
     @{bot_nick} старты
     Через пару секунд появится меню, из которого можно выбрать нужный вариант информации.
-    Про погоду и воздух можно также спросить напрямую, например, "Бот, погода Москва Кузьминки".
+    Про погоду и воздух можно также спросить напрямую, например, "Бот, погода Москва Кузьминки", либо 
+    "Бот, воздух Кисловодск".
     Если отправлять сообщения "Бот паркран",  "Бот, инстаграм", бот будет находить картинки или новости.
-    Бот не чувствителен к знакам пунктуации, регистру букв, и, в большинстве случаев, к порядку фраз. 
-    Кроме того, с ботом можно просто поболтать - отправьте сообщение, начинающееся словом бот.""",
-                     disable_notification=True)
+    Бот _не чувствителен_ к знакам пунктуации, регистру букв, и, в большинстве случаев, к порядку фраз. 
+    Кроме того, с ботом можно просто поболтать - отправьте сообщение, начинающееся словом *бот*.""",
+                     disable_notification=True, parse_mode='Markdown')
 
 
 @bot.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
@@ -131,40 +132,49 @@ def query_parkrun(inline_query):
         m1 = types.InlineQueryResultArticle(
             f'{1}', 'Где бегали наши одноклубники?', description='перечень паркранов',
             input_message_content=types.InputTextMessageContent(pattern + 'об участии...'),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/1.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/1.jpg',
+            thumb_width=48, thumb_height=48)
         m2 = types.InlineQueryResultArticle(
             f'{2}', 'Как установить наш клуб в parkrun?', description='ссылка на клуб Wake&Run',
             input_message_content=types.InputTextMessageContent(parkrun.club_link,
                                                                 parse_mode='Markdown', disable_web_page_preview=True),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/2.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/2.jpg',
+            thumb_width=48, thumb_height=48)
         m3 = types.InlineQueryResultArticle(
             f'{3}', 'Топ 10 волонтёров', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'о волонтёрах.', parse_mode='Markdown'),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/3.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/3.jpg',
+            thumb_width=48, thumb_height=48)
         m4 = types.InlineQueryResultArticle(
             f'{4}', 'Топ 10 одноклубников по числу забегов', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'о количестве стартов в Кузьминках...'),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/4.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/4.jpg',
+            thumb_width=48, thumb_height=48)
         m5 = types.InlineQueryResultArticle(
             f'{5}', 'Топ 10 одноклубников по количеству паркранов', description='по всем паркранам',
             input_message_content=types.InputTextMessageContent(pattern + 'о количестве всех стартов...'),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/5.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/5.jpg',
+            thumb_width=48, thumb_height=48)
         m6 = types.InlineQueryResultArticle(
             f'{6}', 'Топ 10 результатов одноклубников', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'о рекордах...'),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/6.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/6.jpg',
+            thumb_width=48, thumb_height=48)
         m7 = types.InlineQueryResultArticle(
             f'{7}', 'Самые медленные паркраны России', description='по мужским результатам',
             input_message_content=types.InputTextMessageContent(pattern + 'о российских паркранах'),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/7.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/7.jpg',
+            thumb_width=48, thumb_height=48)
         m8 = types.InlineQueryResultArticle(
             f'{8}', 'Гистограмма с последними результатами', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'и расчёт диаграммы...'),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/8.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/8.jpg',
+            thumb_width=48, thumb_height=48)
         m9 = types.InlineQueryResultArticle(
             f'{9}', 'Диаграмма с распределением по клубам', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'о клубах...'),
-            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/9.jpg', thumb_width=48, thumb_height=48)
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/9.jpg',
+            thumb_width=48, thumb_height=48)
         bot.answer_inline_query(inline_query.id, [m1, m3, m8, m9, m4, m5, m6, m7, m2], cache_time=36000)
     except Exception as e:
         logger.error(e)
@@ -206,7 +216,7 @@ def post_parkrun_info(message):
     bot.delete_message(message.chat.id, message.id)
 
 
-@bot.inline_handler(lambda query: re.search(r'соревнован|старт|забег', query.query))
+@bot.inline_handler(lambda query: re.search(r'соревнован|старт|забег|competition|event', query.query))
 def query_competitions(inline_query):
     try:
         date = time.gmtime(time.time())
