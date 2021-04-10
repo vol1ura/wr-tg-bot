@@ -172,6 +172,7 @@ def make_clubs_bar(pic: str):
     colors = [('blueviolet' if item == 'Wake&Run' else 'darkkhaki') for item in x]
     plt.figure(figsize=(16, 7))
     plt.xticks(rotation=70)
+    plt.yticks(list(range(0, clubs[0], 2)))
     plt.bar(x, clubs.values, color=colors)
     plt.title(f'Количество участников из клубов на паркране Кузьминки {parkrun_date}', size=16)
     plt.tight_layout()
