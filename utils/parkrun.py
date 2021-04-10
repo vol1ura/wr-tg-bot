@@ -1,8 +1,11 @@
+import re
+
 import matplotlib.pyplot as plt
 import pandas as pd
-import re
 import requests
 from lxml.html import parse, fromstring
+from matplotlib.colors import Normalize
+from matplotlib.ticker import MultipleLocator
 
 parkrun_headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
 
@@ -144,12 +147,41 @@ def make_latest_results_diagram(pic: str):
     tree = fromstring(html_page)
     parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
     data = pd.read_html(html_page)[0]
+    number_runners = len(data)
     data = data.dropna(thresh=3)
-    data[data.columns[5]] = data[data.columns[5]].dropna().transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])
+    data['Время'] = data['Время'].dropna()\
+        .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])\
+        .transform(lambda time: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], time.split(':')[::-1])))
+
     plt.figure(figsize=(16, 7))
-    ax = data['Время'] \
-        .transform(lambda time: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], time.split(':')[::-1]))) \
-        .hist(bins=32, color='darkolivegreen')
+    ax = data['Время'].hist(bins=32, color='darkolivegreen')
+    ptchs = ax.patches
+    med = data['Время'].median()
+    m_height = 0
+
+    norm = Normalize(0, med)
+
+    for ptch in ptchs:
+        ptch_x = ptch.get_x()
+        color = plt.cm.viridis(norm(med - abs(med - ptch_x)))
+        ptch.set_facecolor(color)
+        if ptch_x > med: continue
+        m_height = ptch.get_height() + 0.3
+
+    ax.annotate(f'Медианное время\n{med:12.0f}:{(med - int(med)) * 60:02.0f}', (med-2, m_height+0.2))
+    plt.plot([med, med], [0, m_height], 'r')
+
+    ldr_time = ptchs[0].get_x()
+    ldr_y_mark = ptchs[0].get_height() + 0.4
+    ax.annotate(f'Лидер {ldr_time:.0f}:{(ldr_time - int(ldr_time)) * 60:02.0f}', (ldr_time, ldr_y_mark + 0.5),
+                rotation=45)
+    plt.plot([ldr_time, ldr_time], [0, ldr_y_mark], 'r')
+
+    lst_time = ptchs[-1].get_x() + ptchs[-1].get_width()
+    lst_y_mark = ptchs[-1].get_height() + 0.4
+    ax.annotate(f'Всего участников {number_runners}', (lst_time, lst_y_mark + 0.5), rotation=90)
+    plt.plot([lst_time, lst_time], [0, lst_y_mark], 'r')
+
     ax.set_xlabel("Результаты участников (минуты)", size=12)
     ax.set_ylabel("Результатов в диапазоне", size=12)
     plt.title(f'Результаты паркрана Кузьминки {parkrun_date}', size=16)
@@ -170,9 +202,13 @@ def make_clubs_bar(pic: str):
     clubs = data['Клуб'].value_counts()
     x = clubs.index
     colors = [('blueviolet' if item == 'Wake&Run' else 'darkkhaki') for item in x]
-    plt.figure(figsize=(16, 7))
+
+    fig = plt.figure(figsize=(16, 7))
+    ax = fig.add_subplot()
+    ax.grid(False, axis='x')
+    ax.grid(True, axis='y')
+    ax.yaxis.set_major_locator(MultipleLocator(base=2))
     plt.xticks(rotation=70)
-    plt.yticks(list(range(0, clubs[0], 2)))
     plt.bar(x, clubs.values, color=colors)
     plt.title(f'Количество участников из клубов на паркране Кузьминки {parkrun_date}', size=16)
     plt.tight_layout()
@@ -185,6 +221,6 @@ if __name__ == '__main__':
     # mes = most_slow_parkruns()
     # print(mes)
     # get_latest_results_diagram()
-    # make_latest_results_diagram('../utils/results.png').close()
+    make_latest_results_diagram('../utils/results.png').close()
     # add_volunteers(204, 204)
-    make_clubs_bar('../utils/clubs.png').close()
+    # make_clubs_bar('../utils/clubs.png').close()
