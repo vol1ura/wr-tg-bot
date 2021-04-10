@@ -140,7 +140,7 @@ def most_slow_parkruns():
     return message.rstrip()
 
 
-def make_latest_results_diagram(pic: str):
+def make_latest_results_diagram(pic: str, name=None, turn=0):
     url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
     page_all_results = requests.get(url, headers=parkrun_headers)
     html_page = page_all_results.text
@@ -158,29 +158,52 @@ def make_latest_results_diagram(pic: str):
     ptchs = ax.patches
     med = data['Время'].median()
     m_height = 0
+    personal_y_mark = 0
 
     norm = Normalize(0, med)
+
+    if name:
+        personal_res = data[data['Участник'].str.contains(name.upper())].reset_index(drop=True)
+        if personal_res.empty:
+            raise FileNotFoundError
+        personal_name = re.search(r'([^\d]+)\d.*', personal_res["Участник"][0])[1]
+        personal_time = personal_res['Время'][0]
+    else:
+        personal_time = 0
+        personal_name = ''
 
     for ptch in ptchs:
         ptch_x = ptch.get_x()
         color = plt.cm.viridis(norm(med - abs(med - ptch_x)))
         ptch.set_facecolor(color)
-        if ptch_x > med: continue
-        m_height = ptch.get_height() + 0.3
+        if ptch_x <= med:
+            m_height = ptch.get_height() + 0.3
+        if ptch_x <= personal_time:
+            personal_y_mark = ptch.get_height() + 0.3
 
-    ax.annotate(f'Медианное время\n{med:12.0f}:{(med - int(med)) * 60:02.0f}', (med-2, m_height+0.2))
+    med_message = f'Медианное время\n{med:12.0f}:{(med - int(med)) * 60:02.0f}'
+    ax.annotate(med_message, (med - 2, m_height))
+
     plt.plot([med, med], [0, m_height], 'r')
 
     ldr_time = ptchs[0].get_x()
     ldr_y_mark = ptchs[0].get_height() + 0.4
-    ax.annotate(f'Лидер {ldr_time:.0f}:{(ldr_time - int(ldr_time)) * 60:02.0f}', (ldr_time, ldr_y_mark + 0.5),
-                rotation=45)
+    ax.annotate(f'Лидер {ldr_time:.0f}:{(ldr_time - int(ldr_time)) * 60:02.0f}',
+                (ldr_time - 0.3, ldr_y_mark + 0.5),
+                rotation=90)
     plt.plot([ldr_time, ldr_time], [0, ldr_y_mark], 'r')
 
     lst_time = ptchs[-1].get_x() + ptchs[-1].get_width()
     lst_y_mark = ptchs[-1].get_height() + 0.4
     ax.annotate(f'Всего участников {number_runners}', (lst_time, lst_y_mark + 0.5), rotation=90)
     plt.plot([lst_time, lst_time], [0, lst_y_mark], 'r')
+
+    if name and personal_time:
+        ax.annotate(f'{personal_name}\n'
+                    f'{personal_time:.0f}:{(personal_time - int(personal_time)) * 60:02.0f}',
+                    (personal_time - 0.3, personal_y_mark + 0.5),
+                    rotation=turn, color='red', size=12, fontweight='bold')
+        plt.plot([personal_time, personal_time], [0, personal_y_mark], 'r')
 
     ax.set_xlabel("Результаты участников (минуты)", size=12)
     ax.set_ylabel("Результатов в диапазоне", size=12)
@@ -221,6 +244,6 @@ if __name__ == '__main__':
     # mes = most_slow_parkruns()
     # print(mes)
     # get_latest_results_diagram()
-    make_latest_results_diagram('../utils/results.png').close()
+    make_latest_results_diagram('../utils/results.png', 'Титов').close()
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()

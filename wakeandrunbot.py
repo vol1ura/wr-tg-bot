@@ -242,6 +242,22 @@ def query_competitions(inline_query):
         logger.error(e)
 
 
+@bot.message_handler(regexp=r'(?i)бот[, \w]+?(паркран\w?|parkrun)( \w+){1,3}( \d+)?$')
+def parkrun_personal_result(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    try:
+        turn = re.search(r'\d+$', message.text)
+        turn = int(turn[0]) % 360 if turn else 0
+        person = re.sub(r'.*(паркран\w?|parkrun) ', '', message.text)
+        person = re.sub(r'\d', '', person).strip()
+        pic = parkrun.make_latest_results_diagram('results.png', person, turn)
+        bot.send_photo(message.chat.id, pic)
+        pic.close()
+    except:
+        logger.error(f'Attempt to generate personal diagram failed. Query: {message.text}')
+        bot.reply_to(message, 'Что-то пошло не так. Возможно, вы неправильно ввели имя.')
+
+
 @bot.message_handler(regexp=r'(?i)бот,? (паркран|parkrun)', content_types=['text'])
 def get_parkrun_picture(message):
     token = os.environ.get('VK_SERVICE_TOKEN')
