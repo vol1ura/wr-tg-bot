@@ -153,7 +153,7 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
         .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])\
         .transform(lambda time: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], time.split(':')[::-1])))
 
-    plt.figure(figsize=(16, 7))
+    plt.figure(figsize=(5.5, 4), dpi=300)
     ax = data['Время'].hist(bins=32, color='darkolivegreen')
     ptchs = ax.patches
     med = data['Время'].median()
@@ -181,8 +181,8 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
         if ptch_x <= personal_time:
             personal_y_mark = ptch.get_height() + 0.3
 
-    med_message = f'Медианное время\n{med:12.0f}:{(med - int(med)) * 60:02.0f}'
-    ax.annotate(med_message, (med - 2, m_height))
+    med_message = f'Медианное время\n{med:.0f}:{(med - int(med)) * 60:02.0f}'
+    ax.annotate(med_message, (med, m_height), rotation=turn)
 
     plt.plot([med, med], [0, m_height], 'r')
 
@@ -205,9 +205,9 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
                     rotation=turn, color='red', size=12, fontweight='bold')
         plt.plot([personal_time, personal_time], [0, personal_y_mark], 'r')
 
-    ax.set_xlabel("Результаты участников (минуты)", size=12)
-    ax.set_ylabel("Результатов в диапазоне", size=12)
-    plt.title(f'Результаты паркрана Кузьминки {parkrun_date}', size=16)
+    ax.set_xlabel("Результаты участников (минуты)")
+    ax.set_ylabel("Результатов в диапазоне")
+    plt.title(f'Результаты паркрана Кузьминки {parkrun_date}', size=13, fontweight='bold')
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
