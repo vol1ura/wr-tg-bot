@@ -165,8 +165,9 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
     if name:
         personal_res = data[data['Участник'].str.contains(name.upper())].reset_index(drop=True)
         if personal_res.empty:
-            raise FileNotFoundError
+            raise AttributeError
         personal_name = re.search(r'([^\d]+)\d.*', personal_res["Участник"][0])[1]
+        personal_name = ' '.join(n.capitalize() for n in personal_name.split())
         personal_time = personal_res['Время'][0]
     else:
         personal_time = 0
@@ -181,27 +182,24 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
         if ptch_x <= personal_time:
             personal_y_mark = ptch.get_height() + 0.3
 
-    med_message = f'Медианное время\n{med:.0f}:{(med - int(med)) * 60:02.0f}'
-    ax.annotate(med_message, (med, m_height), rotation=turn)
-
-    plt.plot([med, med], [0, m_height], 'r')
+    med_message = f'Медиана {int(med)}:{(med - int(med)) * 60:02.0f}'
+    ax.annotate(med_message, (med - 0.5, m_height + 0.2), rotation=turn)
+    plt.plot([med, med], [0, m_height], 'b')
 
     ldr_time = ptchs[0].get_x()
-    ldr_y_mark = ptchs[0].get_height() + 0.4
-    ax.annotate(f'Лидер {ldr_time:.0f}:{(ldr_time - int(ldr_time)) * 60:02.0f}',
-                (ldr_time - 0.3, ldr_y_mark + 0.5),
-                rotation=90)
+    ldr_y_mark = ptchs[0].get_height() + 0.3
+    ldr_message = f'Лидер {int(ldr_time)}:{(ldr_time - int(ldr_time)) * 60:02.0f}'
+    ax.annotate(ldr_message, (ldr_time - 0.5, ldr_y_mark + 0.2), rotation=90)
     plt.plot([ldr_time, ldr_time], [0, ldr_y_mark], 'r')
 
     lst_time = ptchs[-1].get_x() + ptchs[-1].get_width()
-    lst_y_mark = ptchs[-1].get_height() + 0.4
-    ax.annotate(f'Всего участников {number_runners}', (lst_time, lst_y_mark + 0.5), rotation=90)
+    lst_y_mark = ptchs[-1].get_height() + 0.3
+    ax.annotate(f'Всего участников {number_runners}', (lst_time - 0.5, lst_y_mark + 0.2), rotation=90)
     plt.plot([lst_time, lst_time], [0, lst_y_mark], 'r')
 
     if name and personal_time:
-        ax.annotate(f'{personal_name}\n'
-                    f'{personal_time:.0f}:{(personal_time - int(personal_time)) * 60:02.0f}',
-                    (personal_time - 0.3, personal_y_mark + 0.5),
+        ax.annotate(f'{personal_name}\n{int(personal_time)}:{(personal_time - int(personal_time)) * 60:02.0f}',
+                    (personal_time - 0.5, personal_y_mark + 0.2),
                     rotation=turn, color='red', size=12, fontweight='bold')
         plt.plot([personal_time, personal_time], [0, personal_y_mark], 'r')
 
@@ -226,14 +224,15 @@ def make_clubs_bar(pic: str):
     x = clubs.index
     colors = [('blueviolet' if item == 'Wake&Run' else 'darkkhaki') for item in x]
 
-    fig = plt.figure(figsize=(16, 7))
+    fig = plt.figure(figsize=(6, 6), dpi=300)
     ax = fig.add_subplot()
     ax.grid(False, axis='x')
     ax.grid(True, axis='y')
     ax.yaxis.set_major_locator(MultipleLocator(base=2))
-    plt.xticks(rotation=70)
+    plt.xticks(rotation=80, size=8)
     plt.bar(x, clubs.values, color=colors)
-    plt.title(f'Количество участников из клубов на паркране Кузьминки {parkrun_date}', size=16)
+    plt.title(f'Клубы на паркране Кузьминки {parkrun_date}', size=14, fontweight='bold')
+    plt.ylabel('Количество участников')
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
