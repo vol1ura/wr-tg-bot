@@ -66,7 +66,7 @@ def get_participants():
     message = f'Паркраны, где побывали наши одноклубники {data.group(1)}:\n'
     for i, (p, l) in enumerate(zip(places, links_to_results), 1):
         p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
-        message += f'{i}. [{p.text_content().strip()}\xa0№{p_num}]({l})\n'
+        message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l})\n"
     message += f'\nУчаствовало {data.group(3)} из {data.group(2)} чел.'
     return message
 
@@ -239,10 +239,10 @@ def make_clubs_bar(pic: str):
 
 
 if __name__ == '__main__':
-    # mes = get_participants()
+    mes = get_participants()
     # mes = most_slow_parkruns()
-    # print(mes)
+    print(mes)
     # get_latest_results_diagram()
-    make_latest_results_diagram('../utils/results.png', 'Титов').close()
+    # make_latest_results_diagram('../utils/results.png', 'Титов').close()
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()
