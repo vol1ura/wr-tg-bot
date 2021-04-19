@@ -81,13 +81,9 @@ def get_club_table():
 
 def get_kuzminki_fans():
     data = get_club_table()
-    data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
-    table = data.drop(data.iloc[:, 1:7], axis=1).\
-        drop(data.columns[8], axis=1).\
-        sort_values(by=[data.columns[7]], ascending=False).\
-        reset_index(drop=True).head(10)
+    table = data.sort_values(by=[data.columns[7]], ascending=False).head(10)
     sportsmens = table[table.columns[0]]
-    pr_num = table[table.columns[1]]
+    pr_num = table[table.columns[7]]
     message = 'Наибольшее количество забегов _в Кузьминках_:\n'
     for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
@@ -96,13 +92,9 @@ def get_kuzminki_fans():
 
 def get_wr_purkruners():
     data = get_club_table()
-    data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
-    table = data.drop(data.iloc[:, 1:8], axis=1).\
-        sort_values(by=[data.columns[8]], ascending=False).\
-        reset_index(drop=True).\
-        head(10)
+    table = data.sort_values(by=[data.columns[8]], ascending=False).head(10)
     sportsmens = table[table.columns[0]]
-    pr_num = table[table.columns[1]]
+    pr_num = table[table.columns[8]]
     message = 'Рейтинг одноклубников _по количеству паркранов_:\n'
     for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
@@ -111,8 +103,7 @@ def get_wr_purkruners():
 
 def get_kuzminki_top_results():
     data = get_club_table()
-    data.rename(columns={data.columns[0][0]: 'Участник', data.columns[0][1]: 'W&R'}, inplace=True)
-    table = data.drop(data.iloc[:, 2:], axis=1).sort_values(by=[data.columns[1]]).reset_index(drop=True).head(10)
+    table = data.sort_values(by=[data.columns[1]]).head(10)
     sportsmens = table[table.columns[0]]
     result = table[table.columns[1]]
     message = 'Самые быстрые одноклубники _на паркране Кузьминки_:\n'
@@ -125,15 +116,9 @@ def most_slow_parkruns():
     url = 'https://www.parkrun.ru/results/courserecords/'
     page_all_results = requests.get(url, headers=parkrun_headers)
     data = pd.read_html(page_all_results.text)[0]
-    data.drop(data.columns[[1, 5]], axis=1, inplace=True)
-    data.rename(columns={data.columns[0][0]: 'Parkrun'}, inplace=True)
-    table = data.drop(data.iloc[:, 1:5], axis=1)\
-        .drop(data.columns[6], axis=1)\
-        .sort_values(by=[data.columns[5]], ascending=False)\
-        .reset_index(drop=True)\
-        .head(10)
+    table = data.sort_values(by=[data.columns[7]], ascending=False).head(10)
     parkrun = table[table.columns[0]]
-    result = table[table.columns[1]]
+    result = table[table.columns[7]]
     message = '*10 самых медленных паркранов:*\n'
     for i, (name, num) in enumerate(zip(parkrun, result), 1):
         message += f'{i:>2}.\xa0{name:<25}\xa0*{num:<3}*\n'
@@ -239,8 +224,11 @@ def make_clubs_bar(pic: str):
 
 
 if __name__ == '__main__':
-    mes = get_participants()
+    # mes = get_participants()
+    # mes = get_kuzminki_top_results()
+    # mes = get_wr_purkruners()
     # mes = most_slow_parkruns()
+    mes = get_kuzminki_fans()
     print(mes)
     # get_latest_results_diagram()
     # make_latest_results_diagram('../utils/results.png', 'Титов').close()
