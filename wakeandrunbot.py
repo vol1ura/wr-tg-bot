@@ -59,7 +59,7 @@ def schedule(message):
                      parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
 
 
-@bot.message_handler(commands=['help', 'помощь', 'команды', 'справка'])
+@bot.message_handler(commands=['help', 'помощь'])
 def commands(message):
     bot_nick = bot.get_me().to_dict()["username"]
     bot.send_message(message.chat.id, f"""Я понимаю следующие команды:
@@ -67,7 +67,7 @@ def commands(message):
     📱 /social, /соцсети - Wake&Run в соцсетях
     👤 /admin, /админ - администраторы чата
     🤖 /about, /оботе - информация о боте
-    ❓ /help, /помощь, /справка, /команды - _данное сообщение_
+    ❓ /help, /помощь - _данное сообщение_
     Есть *inline* режим запросов - наберите в поле ввода сообщения @{bot_nick} <запрос> (примеры):
     @{bot_nick} погода
     @{bot_nick} паркран
@@ -94,7 +94,7 @@ def ask_weather(message):
         try:
             location = app.geocode(place).raw
         except AttributeError:
-            return bot.reply_to(message, 'Есть такой населённый пункт? ...не знаю. Введите запрос в в формате '
+            return bot.reply_to(message, f'Есть такой населённый пункт {place}? ...не знаю. Введите запрос в в формате '
                                          '"Бот, погода Город" или "Бот, воздух Название Область".')
         if match.group(1).startswith('погод'):
             bot.send_chat_action(message.chat.id, 'typing')
@@ -280,7 +280,6 @@ def get_instagram_post(message):
 
 @bot.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
 def simple_answers(message):
-    ans = []
     if 'как' in message.text and re.search(r'\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
         ans = content.phrases_about_myself
     elif re.search(r'привет|\bhi\b|hello|здравствуй', message.text, re.I):
@@ -288,10 +287,6 @@ def simple_answers(message):
         ans = [s.format(user) for s in content.greeting]
     elif fucomp.bot_compare(message.text, fucomp.phrases_parkrun):
         ans = content.phrases_about_parkrun
-
-    if ans:
-        bot.reply_to(message, random.choice(ans), disable_web_page_preview=True)
-        return
     elif 'погода' in message.text:
         bot_nick = bot.get_me().to_dict()["username"]
         ans = [f'Информацию о погоде можно получить через inline запрос: в строке сообщений наберите "@{bot_nick} погода".'
@@ -300,6 +295,12 @@ def simple_answers(message):
         ans = content.phrases_grut
     elif re.search(r'\bгречк|\bгречневая', message.text, re.I):
         ans = content.phrases_grechka
+    else:
+        ans = None
+
+    if ans:
+        bot.reply_to(message, random.choice(ans), disable_web_page_preview=True)
+        return
     else:
         bot.send_chat_action(message.chat.id, 'typing')
         ans_variant = random.randrange(3)
