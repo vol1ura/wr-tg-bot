@@ -279,6 +279,7 @@ def get_instagram_post(message):
 
 
 @bot.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
+@bot.message_handler(func=lambda mes: mes.reply_to_message and mes.reply_to_message.from_user.is_bot)
 def simple_answers(message):
     if 'как' in message.text and re.search(r'\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
         ans = content.phrases_about_myself
