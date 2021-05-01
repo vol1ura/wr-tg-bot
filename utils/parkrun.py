@@ -1,4 +1,5 @@
 import re
+from datetime import date, timedelta
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -61,11 +62,17 @@ def get_participants():
     tree = parse(result.raw)
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
     data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
+    date_info = date.fromisoformat(data.group(1))
+    if date.today() > date_info + timedelta(6):
+        message = 'Извините, но результаты в системе parkrun ещё не обновились 😿 Всё, что могу предложить ' \
+                  'на данный момент - результаты за прошлую неделю.\n'
+    else:
+        message = ''
     places = tree.xpath('//div[@class="floatleft"]/h2')
     participants = tree.xpath('//table/tr/td[4]')
     count = sum(1 for p in participants if p.text_content() != 'Unattached')
     links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
-    message = f'Паркраны, где побывали наши одноклубники {data.group(1)}:\n'
+    message += f'Паркраны, где побывали наши одноклубники {data.group(1)}:\n'
     for i, (p, l) in enumerate(zip(places, links_to_results), 1):
         p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
         message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l})\n"
