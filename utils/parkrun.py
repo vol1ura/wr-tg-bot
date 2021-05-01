@@ -60,14 +60,16 @@ def get_participants():
     result.raw.decode_content = True
     tree = parse(result.raw)
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
-    data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members, (\d+) took part', head)
+    data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
     places = tree.xpath('//div[@class="floatleft"]/h2')
+    participants = tree.xpath('//table/tr/td[4]')
+    count = sum(1 for p in participants if p.text_content() != 'Unattached')
     links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
     message = f'Паркраны, где побывали наши одноклубники {data.group(1)}:\n'
     for i, (p, l) in enumerate(zip(places, links_to_results), 1):
         p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
         message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l})\n"
-    message += f'\nУчаствовало {data.group(3)} из {data.group(2)} чел.'
+    message += f'\nУчаствовало {count} из {data.group(2)} чел.'
     return message
 
 
@@ -224,11 +226,11 @@ def make_clubs_bar(pic: str):
 
 
 if __name__ == '__main__':
-    # mes = get_participants()
+    mes = get_participants()
     # mes = get_kuzminki_top_results()
     # mes = get_wr_purkruners()
     # mes = most_slow_parkruns()
-    mes = get_kuzminki_fans()
+    # mes = get_kuzminki_fans()
     print(mes)
     # get_latest_results_diagram()
     # make_latest_results_diagram('../utils/results.png', 'Титов').close()

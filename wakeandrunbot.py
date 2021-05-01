@@ -304,7 +304,7 @@ def simple_answers(message):
         return
     else:
         bot.send_chat_action(message.chat.id, 'typing')
-        ans_variant = random.randrange(3)
+        ans_variant = random.randrange(2021) % 3
         if ans_variant == 0:
             ans = [search.google(message.text)]
             if not ans[0]:
