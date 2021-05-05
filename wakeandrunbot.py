@@ -288,10 +288,13 @@ def simple_answers(message):
         ans = [s.format(user) for s in content.greeting]
     elif fucomp.bot_compare(message.text, fucomp.phrases_parkrun):
         ans = content.phrases_about_parkrun
+    elif 'Петрищев' in message.text:
+        ans = [fucomp.best_answer(message.text, fucomp.petristchev)]
     elif 'погода' in message.text:
         bot_nick = bot.get_me().to_dict()["username"]
-        ans = [f'Информацию о погоде можно получить через inline запрос: в строке сообщений наберите "@{bot_nick} погода".'
-               'Либо, набрав сообщение, "Бот, погода Населённый пункт", например, "Бот, погода Кузьминки Москва".']
+        ans = [f'Информацию о погоде можно получить через inline запрос: в строке сообщений наберите "@{bot_nick} '
+               'погода". Либо, набрав сообщение, "Бот, погода Населённый пункт", например, '
+               '"Бот, погода Кузьминки Москва".']
     elif re.search(r'GRUT|ГРУТ', message.text, re.I):
         ans = content.phrases_grut
     elif re.search(r'\bгречк|\bгречневая', message.text, re.I):

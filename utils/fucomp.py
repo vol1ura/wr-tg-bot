@@ -68,8 +68,6 @@ with open('utils/message_base_wr.pkl', 'rb') as f:
 with open('utils/message_base_meschch.pkl', 'rb') as f:
     message_base_m = pickle.load(f)
 
-message_base_wr += petristchev
-
 # ===================== TESTING =============================
 if __name__ == '__main__':
     with open('message_base_wr.pkl', 'rb') as f:
