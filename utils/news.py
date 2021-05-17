@@ -11,8 +11,7 @@ def get_competitions(month, year):
     headers = {"Accept": "text/html",
                "Content-Type": "application/x-www-form-urlencoded",
                "Cookie": "hotlog=1",
-               "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
-               }
+               "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
     result = requests.post('https://probeg.org/kalend/kalend.php', data=payload, headers=headers, stream=True)
     result.raw.decode_content = True
     tree = parse(result.raw)
