@@ -1,4 +1,5 @@
 import re
+import time
 from datetime import date, timedelta
 
 import matplotlib.pyplot as plt
@@ -13,13 +14,18 @@ parkrun_headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.
 club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
 
 
+def get_html_tree(url):
+    result = requests.get(url, headers=parkrun_headers, stream=True)
+    result.raw.decode_content = True
+    return parse(result.raw)
+
+
 def add_volunteers(start, stop):
     url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
     parkrun_number = start
     while parkrun_number <= stop:
-        result = requests.get(url + str(parkrun_number), headers=parkrun_headers, stream=True)
-        result.raw.decode_content = True
-        tree = parse(result.raw)
+        time.sleep(1)
+        tree = get_html_tree(url + str(parkrun_number))
         volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
         with open('static/kuzminki_full_stat.txt', 'a') as f:
             for volunteer in volunteers:
@@ -31,16 +37,14 @@ def add_volunteers(start, stop):
 
 def get_volunteers():
     url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
-    result = requests.get(url, headers=parkrun_headers, stream=True)
-    result.raw.decode_content = True
-    tree = parse(result.raw)
+    tree = get_html_tree(url)
     parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
-    with open('static/kuzminki_full_stat.txt', 'r') as f:
+    with open('static/kuzminki_full_stat.txt') as f:
         all_stat = f.readlines()
     last_parkrun_db = int(all_stat[-2].split()[1])
     if last_parkrun_db < parkrun_number:
         add_volunteers(last_parkrun_db + 1, parkrun_number)
-        with open('static/kuzminki_full_stat.txt', 'r') as f:
+        with open('static/kuzminki_full_stat.txt') as f:
             all_stat = f.readlines()
     volunteers = {}
     for line in all_stat:
@@ -56,16 +60,13 @@ def get_volunteers():
 
 
 def get_participants():
-    result = requests.get('https://www.parkrun.com/results/consolidatedclub/?clubNum=23212',
-                          headers=parkrun_headers, stream=True)
-    result.raw.decode_content = True
-    tree = parse(result.raw)
+    tree = get_html_tree('https://www.parkrun.com/results/consolidatedclub/?clubNum=23212')
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
     data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
     date_info = date.fromisoformat(data.group(1))
     if date.today() > date_info + timedelta(6):
-        message = 'Извините, но результаты в системе parkrun ещё не обновились 😿 Всё, что могу предложить ' \
-                  'на данный момент - результаты за прошлую неделю.\n'
+        message = 'Извините, но результаты в системе parkrun ещё не обновились 😿 ' \
+                  'Всё, что могу предложить на данный момент - результаты за прошлую неделю.\n'
     else:
         message = ''
     places = tree.xpath('//div[@class="floatleft"]/h2')
@@ -95,11 +96,11 @@ def get_kuzminki_fans():
     pr_num = table[table.columns[7]]
     message = 'Наибольшее количество забегов _в Кузьминках_:\n'
     for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
-        message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
+        message += f'{i:>2}.\xa0{name:<20}\xa0*{num}*\n'
     return message.rstrip()
 
 
-def get_wr_purkruners():
+def get_wr_parkruners():
     data = get_club_table()
     table = data.sort_values(by=[data.columns[8]], ascending=False).head(10)
     sportsmens = table[table.columns[0]]
@@ -230,16 +231,3 @@ def make_clubs_bar(pic: str):
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
-
-
-if __name__ == '__main__':
-    mes = get_participants()
-    # mes = get_kuzminki_top_results()
-    # mes = get_wr_purkruners()
-    # mes = most_slow_parkruns()
-    # mes = get_kuzminki_fans()
-    print(mes)
-    # get_latest_results_diagram()
-    # make_latest_results_diagram('../utils/results.png', 'Титов').close()
-    # add_volunteers(204, 204)
-    # make_clubs_bar('../utils/clubs.png').close()

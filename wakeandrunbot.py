@@ -201,7 +201,7 @@ def post_parkrun_info(message):
     elif 'о количестве стартов в Кузьминках' in message.text:
         bot.send_message(message.chat.id, parkrun.get_kuzminki_fans(), parse_mode='Markdown')
     elif 'о количестве всех стартов' in message.text:
-        bot.send_message(message.chat.id, parkrun.get_wr_purkruners(), parse_mode='Markdown')
+        bot.send_message(message.chat.id, parkrun.get_wr_parkruners(), parse_mode='Markdown')
     elif 'о рекордах' in message.text:
         bot.send_message(message.chat.id, parkrun.get_kuzminki_top_results(), parse_mode='Markdown')
     elif 'о российских паркранах' in message.text:
