@@ -1,9 +1,17 @@
 .env
-config.py
-/.idea
-/env
-/__pycache__
-/.instapi_cache
-/utils/__pycache__
-/service_scripts
-/.instapi_cache
+service_scripts/
+
+# Environments and IDE
+.idea/
+env*/
+
+# Chaches
+__pycache__/
+.instapi_cache/
+utils/__pycache__/
+.pytest_cache/
+
+# Tests
+.coverage
+tests/content/*.html
+htmlcov/
