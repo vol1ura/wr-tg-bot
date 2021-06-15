@@ -30,8 +30,6 @@ pyparsing==2.4.7
 PySocks==1.7.1
 pyTelegramBotAPI==3.7.9
 pytest==6.2.4
-pytest-responsemock==1.0.1
-pytest-responses==0.5.0
 python-dateutil==2.8.1
 python-dotenv==0.17.1
 python-Levenshtein==0.12.2

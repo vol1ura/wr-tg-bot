@@ -24,7 +24,7 @@ def add_volunteers(start, stop):
     url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
     parkrun_number = start
     while parkrun_number <= stop:
-        time.sleep(1)
+        time.sleep(1.1)
         tree = get_html_tree(url + str(parkrun_number))
         volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
         with open('static/kuzminki_full_stat.txt', 'a') as f:
@@ -63,12 +63,8 @@ def get_participants():
     tree = get_html_tree('https://www.parkrun.com/results/consolidatedclub/?clubNum=23212')
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
     data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
-    date_info = date.fromisoformat(data.group(1))
-    if date.today() > date_info + timedelta(6):
-        message = 'Извините, но результаты в системе parkrun ещё не обновились 😿 ' \
-                  'Всё, что могу предложить на данный момент - результаты за прошлую неделю.\n'
-    else:
-        message = ''
+    info_date = date.fromisoformat(data.group(1))
+    message = add_relevance_notification(info_date)
     places = tree.xpath('//div[@class="floatleft"]/h2')
     results_tables = tree.xpath('//table[contains(@id, "results")]')
     counts = [len(table.xpath('.//tr/td[4]//*[not(contains(text(), "Unattached"))]')) for table in results_tables]
@@ -79,6 +75,12 @@ def get_participants():
         message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l}) ({count}\xa0чел.)\n"
     message += f'\nУчаствовало {sum(counts)} из {data.group(2)} чел.'
     return message
+
+
+def add_relevance_notification(content_date: date) -> str:
+    notification = 'Извините, но результаты в системе parkrun ещё не обновились 😿 ' \
+                   'Всё, что могу предложить на данный момент - результаты за прошлую неделю.\n'
+    return notification if date.today() > content_date + timedelta(6) else ''
 
 
 def get_club_table():
