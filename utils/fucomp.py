@@ -3,15 +3,11 @@ from fuzzywuzzy import process, fuzz
 import pickle
 
 
-def compare(user_phrase, dictionary: list) -> bool:
-    return process.extractOne(user_phrase, dictionary)[1] >= 70
-
-
 def bot_compare(user_phrase, dictionary: list) -> bool:
     accost_bot = re.compile(r'(?i)\bбот\b')
     user_str = str(user_phrase)
     if accost_bot.search(user_str):
-        return process.extractOne(accost_bot.sub('', user_str), dictionary, scorer=fuzz.token_sort_ratio)[1] >= 70
+        return process.extractOne(accost_bot.sub('', user_str), dictionary, scorer=fuzz.token_set_ratio)[1] >= 70
     else:
         return False
 
@@ -67,25 +63,3 @@ with open('utils/message_base_wr.pkl', 'rb') as f:
 
 with open('utils/message_base_meschch.pkl', 'rb') as f:
     message_base_m = pickle.load(f)
-
-# ===================== TESTING =============================
-if __name__ == '__main__':
-    with open('message_base_wr.pkl', 'rb') as f:
-        message_base_wr = pickle.load(f)
-    print(best_answer('бот, знаешь девиз?', message_base_wr))
-
-    phrase1 = 'бот, покажи статью о беге'
-    phrase2 = 'Бот, позови администратора'
-    phrase3 = 'Бот, покажи ссылки на клуб'
-    phrase4 = 'бот, когда откроют паркраны?'
-    test_phrases = [phrase1, phrase2, phrase3, phrase4]
-
-    compare1 = list(map(lambda p: bot_compare(p, phrases_instagram), test_phrases))
-    compare2 = list(map(lambda p: bot_compare(p, phrases_admin), test_phrases))
-    compare3 = list(map(lambda p: bot_compare(p, phrases_social), test_phrases))
-    compare4 = list(map(lambda p: bot_compare(p, phrases_parkrun), test_phrases))
-
-    print(compare1)
-    print(compare2)
-    print(compare3)
-    print(compare4)
