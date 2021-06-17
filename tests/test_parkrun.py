@@ -54,12 +54,11 @@ def courserecords_mock():
     return url
 
 
-@responses.activate
 def test_get_participants(monkeypatch):
     monkeypatch.setattr(parkrun, 'get_html_tree', ParkrunMock('consolidatedclub').get_html_tree)
     mes = parkrun.get_participants()
     assert 'Паркраны, где побывали наши одноклубники' in mes
-    assert 'Kuzminki' in mes
+    assert 'https://www.parkrun.ru/' in mes
     participants_count = [int(p) for p in re.findall(r'\((\d+)\xa0чел\.\)', mes, re.M)]
     participants_sum = int(re.search(r'Участвовало (\d+) из \d+ чел.', mes)[1])
     assert sum(participants_count) == participants_sum
