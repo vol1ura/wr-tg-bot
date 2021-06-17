@@ -2,8 +2,6 @@ import time
 from datetime import timedelta
 
 from instapi import bind, User
-from dotenv import load_dotenv
-import os
 
 
 def get_last_post(login, password, profile_name):
@@ -27,14 +25,3 @@ def get_last_post(login, password, profile_name):
             else f'{days_ago} ДНЯ НАЗАД' if 1 < days_ago < 4 else f'{days_ago} ДНЕЙ НАЗАД' if days_ago < 21 \
             else f'{days_ago} Д. НАЗАД'
         return foto_url, f"📌 @{profile_name} ⏳{how_long_ago}\n{message}\n➡Полный текст: {post_url}"
-
-
-if __name__ == '__main__':
-    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-
-    USERNAME = os.environ.get('IG_USERNAME')
-    PASSWD = os.environ.get('IG_PASSWORD')
-
-    print(get_last_post(USERNAME, PASSWD, 'rocketscienze'))
