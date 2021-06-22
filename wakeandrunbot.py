@@ -36,7 +36,7 @@ def about(message):
 
 @bot.message_handler(commands=['admin', 'админ'])
 @bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_admin))
-def admin(message):
+def admin_info(message):
     if message.chat.type == "private":  # private chat message
         bot.send_message(message.chat.id, 'Здесь нет админов, мы все равны.')
     else:
@@ -49,14 +49,14 @@ def admin(message):
 @bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_social))
 def social(message):
     bot.send_message(message.chat.id, content.about_social,
-                     parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
+                     parse_mode='Markdown', disable_web_page_preview=True, disable_notification=True)
 
 
 @bot.message_handler(commands=['schedule', 'расписание'])
 @bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_schedule))
 def schedule(message):
     bot.send_message(message.chat.id, content.about_training,
-                     parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
+                     parse_mode='Markdown', disable_web_page_preview=True, disable_notification=True)
 
 
 @bot.message_handler(commands=['help', 'помощь'])
@@ -139,7 +139,7 @@ def query_parkrun(inline_query):
             thumb_width=48, thumb_height=48)
         m2 = types.InlineQueryResultArticle(
             f'{2}', 'Как установить наш клуб в parkrun?', description='ссылка на клуб Wake&Run',
-            input_message_content=types.InputTextMessageContent(parkrun.club_link,
+            input_message_content=types.InputTextMessageContent(parkrun.CLUB_INFO,
                                                                 parse_mode='Markdown', disable_web_page_preview=True),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/2.jpg',
             thumb_width=48, thumb_height=48)
@@ -256,8 +256,8 @@ def parkrun_personal_result(message):
         pic = parkrun.make_latest_results_diagram('results.png', person, turn)
         bot.send_photo(message.chat.id, pic)
         pic.close()
-    except:
-        logger.error(f'Attempt to generate personal diagram failed. Query: {message.text}')
+    except Exception as e:
+        logger.error(f'Attempt to generate personal diagram failed. Query: {message.text}. Error: {e}')
         bot.reply_to(message, 'Что-то пошло не так. Возможно, вы неправильно ввели имя.')
 
 
