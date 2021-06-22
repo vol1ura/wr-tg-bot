@@ -8,10 +8,14 @@ import requests
 from lxml.html import parse, fromstring
 from matplotlib.colors import Normalize
 from matplotlib.ticker import MultipleLocator
+from urllib.parse import urlencode
 
 parkrun_headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
 
-club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
+CLUB_NAME = 'Wake&Run'
+CLUB_ID = 23212
+CLUB_LINK = f"https://www.parkrun.com/profile/groups#{urlencode({'id': CLUB_ID, 'q': CLUB_NAME})}"
+CLUB_INFO = f'[Установи в профиле клуб Wake&Run, перейдя по ссылке]({CLUB_LINK})'
 
 
 def get_html_tree(url):
@@ -22,9 +26,8 @@ def get_html_tree(url):
 
 def add_volunteers(start, stop):
     url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
-    parkrun_number = start
-    while parkrun_number <= stop:
-        time.sleep(1.1)
+    for parkrun_number in range(start, stop+1):
+        time.sleep(1.11)
         tree = get_html_tree(url + str(parkrun_number))
         volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
         with open('static/kuzminki_full_stat.txt', 'a') as f:
@@ -32,11 +35,10 @@ def add_volunteers(start, stop):
                 volunteer_name = volunteer.text_content()
                 volunteer_id = re.search(r'\d+', volunteer.attrib['href'])[0]
                 f.write(f'kuzminki\t{parkrun_number}\tA{volunteer_id} {volunteer_name}\n')
-        parkrun_number += 1
 
 
 def get_volunteers():
-    url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
+    url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
     tree = get_html_tree(url)
     parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
     with open('static/kuzminki_full_stat.txt') as f:
@@ -138,7 +140,7 @@ def most_slow_parkruns():
 
 
 def make_latest_results_diagram(pic: str, name=None, turn=0):
-    url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
+    url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
     page_all_results = requests.get(url, headers=parkrun_headers)
     html_page = page_all_results.text
     tree = fromstring(html_page)
@@ -148,7 +150,7 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
     data = data.dropna(thresh=3)
     data['Время'] = data['Время'].dropna()\
         .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])\
-        .transform(lambda time: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], time.split(':')[::-1])))
+        .transform(lambda h_mm_ss: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], h_mm_ss.split(':')[::-1])))
 
     plt.figure(figsize=(5.5, 4), dpi=300)
     ax = data['Время'].hist(bins=32, color='darkolivegreen')
@@ -209,7 +211,7 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
 
 
 def make_clubs_bar(pic: str):
-    url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
+    url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
     page_all_results = requests.get(url, headers=parkrun_headers)
     html_page = page_all_results.text
     tree = fromstring(html_page)

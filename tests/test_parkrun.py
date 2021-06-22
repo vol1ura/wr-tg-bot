@@ -1,7 +1,7 @@
 import os
 import re
+import time
 from datetime import date
-from time import sleep
 
 import pandas
 import pytest
@@ -17,7 +17,8 @@ class ParkrunMock:
     PARKRUN_PAGES = {
         'consolidatedclub': 'https://www.parkrun.com/results/consolidatedclub/?clubNum=23212',
         'clubhistory': 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212',
-        'courserecords': 'https://www.parkrun.ru/results/courserecords/'
+        'courserecords': 'https://www.parkrun.ru/results/courserecords/',
+        'latestresults': 'https://www.parkrun.ru/kuzminki/results/latestresults/'
     }
 
     def __init__(self, page):
@@ -34,24 +35,23 @@ class ParkrunMock:
         return fromstring(self.read_content())
 
     def __prepare_results(self):
-        sleep(1.5)
+        time.sleep(2.03)
         result = requests.get(ParkrunMock.PARKRUN_PAGES[self.__page], headers=parkrun_headers)
         with open(self.__page_path, 'w') as f:
             f.write(result.text)
 
 
-@pytest.fixture
-def clubhistory_mock():
-    url = 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212'
-    responses.add(responses.GET, url, body=ParkrunMock('clubhistory').read_content())
-    return url
+@pytest.fixture(scope='session', autouse=True)
+def prepare_parkrun_pages():
+    for page_name in ParkrunMock.PARKRUN_PAGES.keys():
+        ParkrunMock(page_name)
 
 
-@pytest.fixture
-def courserecords_mock():
-    url = 'https://www.parkrun.ru/results/courserecords/'
-    responses.add(responses.GET, url, body=ParkrunMock('courserecords').read_content())
-    return url
+@pytest.fixture(autouse=True)
+def parkrun_mock():
+    for page_name, page_url in ParkrunMock.PARKRUN_PAGES.items():
+        parkrun_page = ParkrunMock(page_name)
+        responses.add(responses.GET, page_url, body=parkrun_page.read_content())
 
 
 def test_get_participants(monkeypatch):
@@ -72,44 +72,44 @@ def test_add_relevance_notification():
 
 
 @responses.activate
-def test_get_club_table(clubhistory_mock):
+def test_get_club_table():
     data = parkrun.get_club_table()
     assert len(responses.calls) == 1
-    assert responses.calls[0].request.url == clubhistory_mock
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
     assert isinstance(data, pandas.DataFrame)
     assert not data.empty
 
 
 @responses.activate
-def test_get_kuzminki_fans(clubhistory_mock):
+def test_get_kuzminki_fans():
     message = parkrun.get_kuzminki_fans()
     print('\n', message)
     assert len(responses.calls) == 1
-    assert responses.calls[0].request.url == clubhistory_mock
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
 
 
 @responses.activate
-def test_get_wr_parkruners(clubhistory_mock):
+def test_get_wr_parkruners():
     message = parkrun.get_wr_parkruners()
     print('\n', message)
     assert len(responses.calls) == 1
-    assert responses.calls[0].request.url == clubhistory_mock
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
 
 
 @responses.activate
-def test_get_kuzminki_top_results(clubhistory_mock):
+def test_get_kuzminki_top_results():
     message = parkrun.get_kuzminki_top_results()
     print('\n', message)
     assert len(responses.calls) == 1
-    assert responses.calls[0].request.url == clubhistory_mock
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
 
 
 @responses.activate
-def test_most_slow_parkruns(courserecords_mock):
+def test_most_slow_parkruns():
     message = parkrun.most_slow_parkruns()
     print('\n', message)
     assert len(responses.calls) == 1
-    assert responses.calls[0].request.url == courserecords_mock
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
 
 
 def test_get_volunteers():
@@ -118,7 +118,24 @@ def test_get_volunteers():
     assert len(responses.calls) == 0
     assert '*Toп 10 волонтёров parkrun Kuzminki*' in message
 
-# get_latest_results_diagram()
-# make_latest_results_diagram('../utils/results.png', 'Титов').close()
-# add_volunteers(204, 204)
-# make_clubs_bar('../utils/clubs.png').close()
+
+@responses.activate
+def test_make_latest_results_diagram(tmpdir):
+    pic_path = tmpdir.join('results.png')
+    start_time = time.time()
+    parkrun.make_latest_results_diagram(pic_path).close()
+    assert time.time() < start_time + 4
+    assert os.path.exists(pic_path)
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
+
+
+@responses.activate
+def test_make_clubs_bar(tmpdir):
+    pic_path = tmpdir.join('club.png')
+    start_time = time.time()
+    parkrun.make_clubs_bar(pic_path).close()
+    assert time.time() < start_time + 4
+    assert os.path.exists(pic_path)
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
