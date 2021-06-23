@@ -2,7 +2,6 @@ import os
 import time
 
 import requests
-from dotenv import load_dotenv
 from lxml.html import parse
 
 
@@ -92,20 +91,3 @@ def get_air_accu(url: str):
         air_description += f', {v_aqp}({pollutant[p]})-{category[cat]}'
     air_description += ', в µg/m³.'
     return air_index[aqi_category], air_description
-
-
-if __name__ == '__main__':
-    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-
-    lat = 54.045048
-    lon = 37.507175
-    my_name = 'tyelyatinki'
-    my_key = 2442389
-    get_place_accu_params(lat, lon)
-    print(get_air_accu(get_place_accu_params(lat, lon)))
-    # w = get_weather('Test', 43.585472, 39.723089)
-    # print(w)
-    # a = get_air_quality('Some place', 43.585472, 39.723089)
-    # print(a[1])
