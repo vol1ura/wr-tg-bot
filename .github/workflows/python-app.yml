@@ -35,6 +35,7 @@ jobs:
       run: |
         pytest --cov-report=xml --cov=. tests/
       env:
+        API_BOT_TOKEN: ${{ secrets.API_BOT_TOKEN }}
         OWM_TOKEN: ${{ secrets.OWM_TOKEN }}
         VK_SERVICE_TOKEN: ${{ secrets.VK_SERVICE_TOKEN }}
         GOOGLE_CX: ${{ secrets.GOOGLE_CX }}
