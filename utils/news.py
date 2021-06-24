@@ -33,7 +33,7 @@ def get_competitions(month, year):
             continue
         title = cells[0].text_content().strip()
         url = cells[0].xpath('.//b/a/@href')[0].strip()
-        dist = ', '.join(re.findall(r'\d+ [а-я]+', cells[3].text_content()))
+        dist = ', '.join(re.findall(r'(\d+ [а-я]{1,6}|полумарафон|\bмарафон)', cells[3].text_content()))
         description = f'✏️<a href="{url}">{title}</a>' \
                       f'\n🕒\xa0<b>Дата</b>: {when}\xa0| 📌\xa0{where}' \
                       f'\n➡️ <b>Дистанции</b>: {dist}'
@@ -45,8 +45,3 @@ def club_calendar():
     url = 'https://docs.google.com/spreadsheets/d/1zsvCs9NDFc4DyXJyIzZ4CZ7g2pWqYftncAr4hg8SfzA/edit?usp=sharing'
     return 'Google-таблица 📅 стартов и участников 🏃\xa0Wake&Run:\n' \
            f'<a href="{url}">📎\xa0Открыть</a>'
-
-
-if __name__ == '__main__':
-    a = get_competitions(4, 2021)
-    print(a)
