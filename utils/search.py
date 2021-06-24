@@ -6,7 +6,6 @@ import urllib.parse
 from lxml.html import parse
 
 import requests
-from dotenv import load_dotenv
 
 
 def google(phrase):
@@ -17,7 +16,7 @@ def google(phrase):
         "cx": f"{os.environ.get('GOOGLE_CX')}"
     }
     values_url = urllib.parse.urlencode(params)
-    result = requests.get(f'https://www.googleapis.com/customsearch/v1?' + values_url)
+    result = requests.get(f'https://www.googleapis.com/customsearch/v1?{values_url}')
     try:
         res1 = random.choice(result.json()['items'])['htmlSnippet']
     except KeyError:
@@ -39,7 +38,7 @@ def bashim(phrase):
         "text": f"{search_phrase}"
     }
     values_url = urllib.parse.urlencode(params)
-    result = requests.get(f'https://bash.im/search?' + values_url, stream=True)
+    result = requests.get(f'https://bash.im/search?{values_url}', stream=True)
     result.raw.decode_content = True
     tree = parse(result.raw)
     cites = tree.xpath('//article/div/div')
@@ -49,12 +48,3 @@ def bashim(phrase):
             [cite.remove(s) for s in list(cite) if s == '']
             print(f'"{cite[0].strip()}",')
     return ''
-
-
-if __name__ == '__main__':
-    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-
-    s = google('бот, гречка')
-    print(s)
