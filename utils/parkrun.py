@@ -139,30 +139,35 @@ def most_slow_parkruns():
     return message.rstrip()
 
 
-def make_latest_results_diagram(pic: str, name=None, turn=0):
+def get_latest_results_df():
     url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
     page_all_results = requests.get(url, headers=parkrun_headers)
     html_page = page_all_results.text
     tree = fromstring(html_page)
     parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
-    data = pd.read_html(html_page)[0]
-    number_runners = len(data)
-    data = data.dropna(thresh=3)
-    data['Время'] = data['Время'].dropna()\
-        .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])\
+    df = pd.read_html(html_page)[0]
+    number_runners = len(df)
+    df = df.dropna(thresh=3)
+    df['Время'] = df['Время'].dropna() \
+        .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0]) \
         .transform(lambda h_mm_ss: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], h_mm_ss.split(':')[::-1])))
+    return df, number_runners, parkrun_date
+
+
+def make_latest_results_diagram(pic: str, name=None, turn=0):
+    df, number_runners, parkrun_date = get_latest_results_df()
 
     plt.figure(figsize=(5.5, 4), dpi=300)
-    ax = data['Время'].hist(bins=32, color='darkolivegreen')
+    ax = df['Время'].hist(bins=32, color='darkolivegreen')
     ptchs = ax.patches
-    med = data['Время'].median()
+    med = df['Время'].median()
     m_height = 0
     personal_y_mark = 0
 
     norm = Normalize(0, med)
 
     if name:
-        personal_res = data[data['Участник'].str.contains(name.upper())].reset_index(drop=True)
+        personal_res = df[df['Участник'].str.contains(name.upper())].reset_index(drop=True)
         if personal_res.empty:
             raise AttributeError
         personal_name = re.search(r'([^\d]+)\d.*', personal_res["Участник"][0])[1]
@@ -211,15 +216,9 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
 
 
 def make_clubs_bar(pic: str):
-    url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
-    page_all_results = requests.get(url, headers=parkrun_headers)
-    html_page = page_all_results.text
-    tree = fromstring(html_page)
-    parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
-    data = pd.read_html(html_page)[0]
-    data = data.dropna(thresh=3)
+    df, _, parkrun_date = get_latest_results_df()
 
-    clubs = data['Клуб'].value_counts()
+    clubs = df['Клуб'].value_counts()
     x = clubs.index
     colors = [('blueviolet' if item == 'Wake&Run' else 'darkkhaki') for item in x]
 
