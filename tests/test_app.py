@@ -37,14 +37,13 @@ def test_webhook_page(client, monkeypatch):
     assert response.status_code == 200
 
 
-@pytest.mark.skip
-def test_get_message_page(monkeypatch, client, app):
+def test_get_message_page(monkeypatch, client):
     # GIVEN a Flask application configured for testing
-    monkeypatch.setenv('API_BOT_TOKEN', 'test_token_bot')
     monkeypatch.setattr(bot, 'process_new_updates', lambda arg: None)
     monkeypatch.setattr('telebot.types.Update.de_json', lambda arg: None)
+    TOKEN_BOT = 'test_token_bot'
     # WHEN the '/TOKEN_BOT' page is requested (POST)
-    with app.test_request_context('/'):
-        response = client.post(url_for('getMessage'))
+    response = client.post(url_for('getMessage'))
     # THEN check that the response is valid
     assert response.status_code == 200
+    assert response.data == b'!'
