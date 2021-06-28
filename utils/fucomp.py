@@ -1,3 +1,4 @@
+import os
 import re
 from fuzzywuzzy import process, fuzz
 import pickle
@@ -58,8 +59,10 @@ petristchev = [
     "Петрищев всегда с нами! 🔥🔥🔥", "Куролесит у нас Петрищев)))", "Голый Петрищев великолепен!!!"
 ]
 
-with open('utils/message_base_wr.pkl', 'rb') as f:
+_utils_path = os.path.join(os.path.dirname(__file__), '../utils')
+
+with open(os.path.join(_utils_path, 'message_base_wr.pkl'), 'rb') as f:
     message_base_wr = pickle.load(f)
 
-with open('utils/message_base_meschch.pkl', 'rb') as f:
+with open(os.path.join(_utils_path, 'message_base_meschch.pkl'), 'rb') as f:
     message_base_m = pickle.load(f)
