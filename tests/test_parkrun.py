@@ -1,4 +1,5 @@
 import os
+import random
 import re
 import time
 from datetime import date
@@ -120,6 +121,21 @@ def test_get_volunteers():
 
 
 @responses.activate
+def test_get_latest_results_df():
+    df, number_runners, parkrun_date = parkrun.get_latest_results_df()
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
+    assert isinstance(df, pandas.DataFrame)
+    assert isinstance(number_runners, int)
+    assert number_runners > 0
+    assert isinstance(parkrun_date, str)
+    dd, mm, yyyy = parkrun_date.split('/')
+    assert 0 < int(dd) <= 31
+    assert 0 < int(mm) <= 12
+    assert int(yyyy) >= date.today().year - 1
+
+
+@responses.activate
 def test_make_latest_results_diagram(tmpdir):
     pic_path = tmpdir.join('results.png')
     start_time = time.time()
@@ -138,4 +154,18 @@ def test_make_clubs_bar(tmpdir):
     assert time.time() < start_time + 4
     assert os.path.exists(pic_path)
     assert len(responses.calls) == 1
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
+
+
+@pytest.mark.parametrize('t', range(5))
+@responses.activate
+def test_make_latest_results_diagram_personal(tmpdir, t):
+    df, number_runners, parkrun_date = parkrun.get_latest_results_df()
+    athlete_name = re.search(r'([А-ЯЁ ]+)\d', df.iloc[random.randrange(number_runners), 1])[1].strip()
+    print(athlete_name)
+    pic_path = tmpdir.join('results.png')
+    start_time = time.time()
+    parkrun.make_latest_results_diagram(pic_path, athlete_name).close()
+    assert time.time() < start_time + 4
+    assert os.path.exists(pic_path)
     assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
