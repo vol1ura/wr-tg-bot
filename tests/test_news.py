@@ -1,12 +1,14 @@
 import re
-from datetime import date
+from datetime import date, timedelta
+
+import pytest
 
 from utils.news import get_competitions, club_calendar
 
 
-def test_get_competitions():
-    date_today = date.today()
-    competitions = get_competitions(date_today.month, date_today.year)
+@pytest.mark.parametrize('test_date', [date.today() + timedelta(30 * d) for d in range(3)])
+def test_get_competitions(test_date):
+    competitions = get_competitions(test_date.month, test_date.year)
     print(competitions)
     assert isinstance(competitions, list)
     for competition in competitions:
@@ -15,7 +17,7 @@ def test_get_competitions():
         assert re.fullmatch(r'(\d\d - )?\d\d\.\d\d', competition[1])
         assert isinstance(competition[2], str)
         assert re.match(r'✏️<a href=\"http://probeg\.org/card\.php\?id=\d+\">.*</a>\n'
-                            r'🕒.<b>Дата</b>: (\d\d - )?\d\d\.\d\d.| 📌.+ \(\w+\)', competition[2])
+                        r'🕒.<b>Дата</b>: (\d\d - )?\d\d\.\d\d.| 📌.+ \(\w+\)', competition[2])
 
 
 def test_club_calendar():
