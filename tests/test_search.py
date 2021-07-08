@@ -1,13 +1,6 @@
-import os
 import re
 
-from dotenv import load_dotenv
-
 from utils.search import google, bashim
-
-dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
 
 
 def test_google():
