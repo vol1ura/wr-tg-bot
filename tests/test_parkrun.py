@@ -1,5 +1,4 @@
 import os
-import random
 import re
 import time
 from datetime import date
@@ -7,15 +6,10 @@ from datetime import date
 import pandas
 import pytest
 import responses
+from numpy.random import randint
 
 from tests.parkrun_mock import ParkrunMock
 from utils import parkrun
-
-
-@pytest.fixture(scope='session', autouse=True)
-def prepare_parkrun_pages():
-    for page_name in ParkrunMock.PARKRUN_PAGES.keys():
-        ParkrunMock(page_name)
 
 
 @pytest.fixture(autouse=True)
@@ -127,17 +121,17 @@ def test_make_clubs_bar(tmpdir):
     assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
 
 
-@pytest.mark.parametrize('t', range(5))
+@pytest.mark.parametrize('t, phi', zip(randint(900, size=10), randint(3 * 360, size=10)))
 @responses.activate
-def test_make_latest_results_diagram_personal(tmpdir, t):
-    df, number_runners, parkrun_date = parkrun.get_latest_results_df()
-    athlete_name = re.search(r'([А-ЯЁ ]+)\d', df.iloc[random.randrange(number_runners), 1])[1].strip()
+def test_make_latest_results_diagram_personal(tmpdir, t, phi):
+    df = parkrun.get_latest_results_df()[0].reset_index(drop=True)
+    athlete_name = re.search(r'([А-ЯЁ ]+)\d', df.iloc[t % len(df), 1])[1].strip()
     if not athlete_name:
         return
     print(athlete_name)
     pic_path = tmpdir.join('results.png')
     start_time = time.time()
-    parkrun.make_latest_results_diagram(pic_path, athlete_name).close()
+    parkrun.make_latest_results_diagram(pic_path, athlete_name, phi).close()
     assert time.time() < start_time + 4
     assert os.path.exists(pic_path)
     assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
