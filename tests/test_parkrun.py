@@ -135,3 +135,14 @@ def test_make_latest_results_diagram_personal(tmpdir, t, phi):
     assert time.time() < start_time + 4
     assert os.path.exists(pic_path)
     assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
+
+
+@responses.activate
+def test_make_latest_results_diagram_personal_exception(tmpdir):
+    pic_path = tmpdir.join('results.png')
+    start_time = time.time()
+    with pytest.raises(AttributeError):
+        parkrun.make_latest_results_diagram(pic_path, 'wrong_athlete_name').close()
+    assert time.time() < start_time + 4
+    assert not os.path.exists(pic_path)
+    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
