@@ -1,13 +1,6 @@
 import os
-
 import pytest
-from dotenv import load_dotenv
-
 from utils.instagram import get_last_post
-
-dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
 
 
 @pytest.mark.xfail

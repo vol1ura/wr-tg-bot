@@ -52,16 +52,3 @@ def test_get_air_accu():
     assert re.fullmatch(r'воздух .,( \d+\((O₃|PM2\.5|NO₂|SO₂|CO)\)-.,){5} в µg/m³\.', description)
     assert isinstance(aqi, int)
     assert 1 <= aqi <= 6
-
-
-# lat = 54.045048
-# lon = 37.507175
-# my_name = 'tyelyatinki'
-# my_key = 2442389
-# get_place_accu_params(lat, lon)
-
-# print(get_air_accu(get_place_accu_params(lat, lon)))
-# w = get_weather('Test', 43.585472, 39.723089)
-# print(w)
-# a = get_air_quality('Some place', 43.585472, 39.723089)
-# print(a[1])
