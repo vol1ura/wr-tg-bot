@@ -1,3 +1,4 @@
+import re
 import time
 from datetime import timedelta
 
@@ -18,7 +19,7 @@ def get_last_post(login, password, profile_name):
         foto_url = sorted(foto['candidates'], key=lambda pic: pic['width'])[0]['url']
         post_url = f"https://www.instagram.com/p/{f._media_info()['code']}"
         message = f._media_info()['caption']['text']
-        paragraphs = message.split('\n\n', maxsplit=2)
+        paragraphs = re.split(r'\n.?\n', message, maxsplit=2)
         message = '\n\n'.join(paragraphs[:min(len(paragraphs), 2)])
         days_ago = timedelta(seconds=time.time() - f._media_info()['taken_at']).days
         how_long_ago = 'СЕГОДНЯ' if days_ago == 0 else 'ДЕНЬ НАЗАД' if days_ago == 1 \
