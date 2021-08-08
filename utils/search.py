@@ -19,7 +19,7 @@ def google(phrase):
     result = requests.get(f'https://www.googleapis.com/customsearch/v1?{values_url}')
     try:
         res1 = random.choice(result.json()['items'])['htmlSnippet']
-    except KeyError:
+    except(KeyError, TypeError):
         return ''
     res2 = re.sub(r'(?im)<b>|</b>|\.\.\.|<br>|&nbsp;|&quot;|\n', '', res1)
     res3 = re.sub(r'Марафорум - форум о любительском беге, тренировках,( соревнованиях.)?', '', res2, re.MULTILINE)
