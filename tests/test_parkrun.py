@@ -146,3 +146,15 @@ def test_make_latest_results_diagram_personal_exception(tmpdir):
     assert time.time() < start_time + 4
     assert not os.path.exists(pic_path)
     assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
+
+
+def test_add_volunteers(monkeypatch, tmpdir):
+    volunteers_file = tmpdir.join('kuzminki_full_stat.txt')
+    monkeypatch.setattr(parkrun, 'VOLUNTEERS_FILE', volunteers_file)
+    parkrun.add_volunteers(2, 3)
+    assert os.path.exists(volunteers_file)
+    with open(volunteers_file) as f:
+        volunteers_info = f.readlines()
+    for line in volunteers_info:
+        assert re.fullmatch('kuzminki\t[23]\tA\\d+( \\w+){2,}', line.rstrip())
+    print(volunteers_info)
