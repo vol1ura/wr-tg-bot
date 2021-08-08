@@ -12,9 +12,7 @@ from telebot import types
 
 from utils import content, vk, instagram, weather, parkrun, news, fucomp, search
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 TOKEN_BOT = os.environ.get('API_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN_BOT)
@@ -319,7 +317,6 @@ def simple_answers(message):
     bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 
-if __name__ == '__main__':
-    # print(os.environ.get('API_BOT_TOKEN'))
+if __name__ == '__main__':  # pragma: no cover
     # bot.remove_webhook()
     bot.polling(none_stop=True)

@@ -1,7 +1,6 @@
 # Bot is deployed on Heroku, so it might sleep
 # after 30 mins of being inactive but could wake up (big delay around 30 secs)
 from flask import Flask, request
-
 from wakeandrunbot import *
 
 
@@ -21,18 +20,10 @@ def webhook():
     return "!", 200
 
 
-@app.route("/bot")
-def bot_page():
-    return "<h1>Привет, вы на странице для администрирования бота</h1>", 200
-
-
 @app.route("/")
 def index():
     return "<h1>Привет</h1>", 200
 
 
-if __name__ == '__main__':
-    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
+if __name__ == '__main__':  # pragma: no cover
     app.run()

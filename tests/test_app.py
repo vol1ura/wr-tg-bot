@@ -10,14 +10,6 @@ def app():
     return site
 
 
-def test_bot_page(client):
-    # GIVEN a Flask application configured for testing
-    # WHEN the '/bot' page is requested (GET)
-    response = client.get(url_for('bot_page'))
-    # THEN check that the response is valid
-    assert response.status_code == 200
-
-
 def test_index_page(client):
     # GIVEN a Flask application configured for testing
     # WHEN the '/' page is requested (GET)
