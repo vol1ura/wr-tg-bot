@@ -151,7 +151,7 @@ def get_latest_results_df():
     df = df.dropna(thresh=3)
     df['Время'] = df['Время'].dropna() \
         .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0]) \
-        .transform(lambda h_mm_ss: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], h_mm_ss.split(':')[::-1])))
+        .transform(time_to_float)
     return df, number_runners, parkrun_date
 
 
@@ -187,13 +187,13 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
         if ptch_x <= personal_time:
             personal_y_mark = ptch.get_height() + 0.3
 
-    med_message = f'Медиана {int(med)}:{(med - int(med)) * 60:02.0f}'
+    med_message = f'Медиана {float_to_time(med)}'
     ax.annotate(med_message, (med - 0.5, m_height + 0.2), rotation=turn)
     plt.plot([med, med], [0, m_height], 'b')
 
     ldr_time = ptchs[0].get_x()
     ldr_y_mark = ptchs[0].get_height() + 0.3
-    ldr_message = f'Лидер {int(ldr_time)}:{(ldr_time - int(ldr_time)) * 60:02.0f}'
+    ldr_message = f'Лидер {float_to_time(ldr_time)}'
     ax.annotate(ldr_message, (ldr_time - 0.5, ldr_y_mark + 0.2), rotation=90)
     plt.plot([ldr_time, ldr_time], [0, ldr_y_mark], 'r')
 
@@ -203,7 +203,7 @@ def make_latest_results_diagram(pic: str, name=None, turn=0):
     plt.plot([lst_time, lst_time], [0, lst_y_mark], 'r')
 
     if name and personal_time:
-        ax.annotate(f'{personal_name}\n{int(personal_time)}:{(personal_time - int(personal_time)) * 60:02.0f}',
+        ax.annotate(f'{personal_name}\n{float_to_time(personal_time)}',
                     (personal_time - 0.5, personal_y_mark + 0.2),
                     rotation=turn, color='red', size=12, fontweight='bold')
         plt.plot([personal_time, personal_time], [0, personal_y_mark], 'r')
@@ -235,3 +235,12 @@ def make_clubs_bar(pic: str):
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
+
+
+def time_to_float(h_mm_ss):
+    return sum(x * float(t) for x, t in zip([1 / 60, 1, 60], h_mm_ss.split(':')[::-1]))
+
+
+def float_to_time(mins):
+    secs = round(mins * 60)
+    return f'{secs // 60}:{secs % 60}'
