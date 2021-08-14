@@ -243,4 +243,4 @@ def time_to_float(h_mm_ss):
 
 def float_to_time(mins):
     secs = round(mins * 60)
-    return f'{secs // 60}:{secs % 60}'
+    return f'{secs // 60}:{secs % 60:02d}'

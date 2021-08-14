@@ -158,3 +158,17 @@ def test_add_volunteers(monkeypatch, tmpdir):
     for line in volunteers_info:
         assert re.fullmatch('kuzminki\t[23]\tA\\d+( \\w+){2,}', line.rstrip())
     print(volunteers_info)
+
+
+time_to_try = [('17:01', 17.016667), ('18:59', 18.983333), ('19:30', 19.5), ('21:00', 20.99999),
+               ('23:15', 23.25), ('25:09', 25.15), ('1:05:45', 65.75)]
+
+
+@pytest.mark.parametrize('h_mm_ss, mins', argvalues=time_to_try)
+def test_time_to_float(h_mm_ss, mins):
+    assert abs(parkrun.time_to_float(h_mm_ss) - mins) < 10**(-5)
+
+
+@pytest.mark.parametrize('h_mm_ss, mins', argvalues=time_to_try[:-1])
+def test_float_to_time(h_mm_ss, mins):
+    assert parkrun.float_to_time(mins) == h_mm_ss
