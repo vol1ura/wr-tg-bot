@@ -84,6 +84,20 @@ def test_get_volunteers():
     assert '*Toп 10 волонтёров parkrun Kuzminki*' in message
 
 
+def test_get_volunteers_fake(monkeypatch, tmpdir):
+    volunteers_file = tmpdir.join('vol_stat.txt')
+    volunteers_file.write('kuzminki\t1 1 a b c\nkuzminki\t1 1 d e')
+    monkeypatch.setattr(parkrun, 'VOLUNTEERS_FILE', volunteers_file)
+    monkeypatch.setattr(parkrun, 'add_volunteers', lambda a, b: None)
+    message = parkrun.get_volunteers()
+    print('\n', message)
+    assert len(responses.calls) == 0
+    lines = message.split('\n')
+    assert '*Toп 10 волонтёров parkrun Kuzminki*' == lines[0]
+    assert '1. a b c | 1' == lines[1]
+    assert '2. d e | 1' == lines[2]
+
+
 @responses.activate
 def test_get_latest_results_df():
     df, number_runners, parkrun_date = parkrun.get_latest_results_df()
