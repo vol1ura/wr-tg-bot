@@ -10,7 +10,17 @@ from matplotlib.colors import Normalize
 from matplotlib.ticker import MultipleLocator
 from urllib.parse import urlencode
 
-parkrun_headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
+PARKRUN_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0',
+    'Host': 'parkrun.ru',
+    'Accept': '*/*',
+    'Accept-Language': 'ru-RU,ru;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Referer': 'https://parkrun.ru/',
+    'Sec-GPC': '1',
+    'Cache-Control': 'max-age=0'
+}
 
 CLUB_NAME = 'Wake&Run'
 CLUB_ID = 23212
@@ -20,12 +30,12 @@ VOLUNTEERS_FILE = 'static/kuzminki_full_stat.txt'
 
 
 def get_html_tree(url):
-    result = requests.get(url, headers=parkrun_headers, stream=True)
+    result = requests.get(url, headers=PARKRUN_HEADERS, stream=True)
     result.raw.decode_content = True
     return parse(result.raw)
 
 
-def add_volunteers(start, stop):
+def add_volunteers(start, stop) -> None:
     url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
     for parkrun_number in range(start, stop+1):
         time.sleep(1.11)
@@ -38,7 +48,7 @@ def add_volunteers(start, stop):
                 f.write(f'kuzminki\t{parkrun_number}\tA{volunteer_id} {volunteer_name}\n')
 
 
-def get_volunteers():
+def get_volunteers() -> str:
     url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
     tree = get_html_tree(url)
     parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
@@ -62,7 +72,7 @@ def get_volunteers():
     return result.strip()
 
 
-def get_participants():
+def get_participants() -> str:
     tree = get_html_tree('https://www.parkrun.com/results/consolidatedclub/?clubNum=23212')
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
     data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
@@ -72,7 +82,7 @@ def get_participants():
     results_tables = tree.xpath('//table[contains(@id, "results")]')
     counts = [len(table.xpath('.//tr/td[4]//a')) for table in results_tables]
     links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
-    message += f'Паркраны, где побывали наши одноклубники {data.group(1)}:\n'
+    message += f'Паркраны, где побывали наши wakeandrunцы {data.group(1)}:\n'
     for i, (p, l, count) in enumerate(zip(places, links_to_results, counts), 1):
         p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
         message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l}) ({count}\xa0чел.)\n"
@@ -88,13 +98,13 @@ def add_relevance_notification(content_date: date) -> str:
 
 def get_club_table():
     url = 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212'
-    page_all_results = requests.get(url, headers=parkrun_headers)
+    page_all_results = requests.get(url, headers=PARKRUN_HEADERS)
     data = pd.read_html(page_all_results.text)[0]
     data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
     return data
 
 
-def get_kuzminki_fans():
+def get_kuzminki_fans() -> str:
     data = get_club_table()
     table = data.sort_values(by=[data.columns[7]], ascending=False).head(10)
     sportsmens = table[table.columns[0]]
@@ -105,7 +115,7 @@ def get_kuzminki_fans():
     return message.rstrip()
 
 
-def get_wr_parkruners():
+def get_wr_parkruners() -> str:
     data = get_club_table()
     table = data.sort_values(by=[data.columns[8]], ascending=False).head(10)
     sportsmens = table[table.columns[0]]
@@ -116,7 +126,7 @@ def get_wr_parkruners():
     return message.rstrip()
 
 
-def get_kuzminki_top_results():
+def get_kuzminki_top_results() -> str:
     data = get_club_table()
     table = data.sort_values(by=[data.columns[1]]).head(10)
     sportsmens = table[table.columns[0]]
@@ -127,9 +137,9 @@ def get_kuzminki_top_results():
     return message.rstrip()
 
 
-def most_slow_parkruns():
+def most_slow_parkruns() -> str:
     url = 'https://www.parkrun.ru/results/courserecords/'
-    page_all_results = requests.get(url, headers=parkrun_headers)
+    page_all_results = requests.get(url, headers=PARKRUN_HEADERS)
     data = pd.read_html(page_all_results.text)[0]
     table = data.sort_values(by=[data.columns[7]], ascending=False).head(10)
     parkrun = table[table.columns[0]]
@@ -140,9 +150,9 @@ def most_slow_parkruns():
     return message.rstrip()
 
 
-def get_latest_results_df():
+def get_latest_results_df() -> tuple:
     url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
-    page_all_results = requests.get(url, headers=parkrun_headers)
+    page_all_results = requests.get(url, headers=PARKRUN_HEADERS)
     html_page = page_all_results.text
     tree = fromstring(html_page)
     parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
@@ -237,10 +247,12 @@ def make_clubs_bar(pic: str):
     return open(pic, 'rb')
 
 
-def time_to_float(h_mm_ss):
+def time_to_float(h_mm_ss) -> float:
+    """Convert time string to minutes in float"""
     return sum(x * float(t) for x, t in zip([1 / 60, 1, 60], h_mm_ss.split(':')[::-1]))
 
 
-def float_to_time(mins):
+def float_to_time(mins) -> str:
+    """Convert minutes to string in format HH:MM"""
     secs = round(mins * 60)
     return f'{secs // 60}:{secs % 60:02d}'

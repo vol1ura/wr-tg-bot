@@ -72,13 +72,13 @@ def commands(message):
     @{bot_nick} воздух
     @{bot_nick} старты
     Через пару секунд появится меню, из которого можно выбрать нужный вариант информации.
-    Про погоду и воздух можно также спросить напрямую, например, _Бот, погода Москва Кузьминки_, либо 
+    Про погоду и воздух можно также спросить напрямую, например, _Бот, погода Москва Кузьминки_, либо
     _Бот, воздух Кисловодск_.
     При запросе _Бот, паркран Фамилия_, бот попытается найти результат участника с указанной фамилией на последнем
-    загруженном в систему паркране Кузьминки. Если маркеры наползают друг на друга, можно повернуть надпись, 
+    загруженном в систему паркране Кузьминки. Если маркеры наползают друг на друга, можно повернуть надпись,
     указав целое количество градусов поворота, например, _Бот, паркран Фамилия 45_ - надписи повернутся на 45°.
     Если отправлять сообщения _Бот паркран_,  _Бот, инстаграм_, бот будет находить картинки или новости.
-    Бот _не чувствителен_ к знакам пунктуации, регистру букв, и, в большинстве случаев, к порядку фраз. 
+    Бот _не чувствителен_ к знакам пунктуации, регистру букв, и, в большинстве случаев, к порядку фраз.
     Кроме того, с ботом можно просто поболтать - отправьте сообщение, начинающееся словом *бот*.""",
                      disable_notification=True, parse_mode='Markdown')
 
@@ -131,7 +131,7 @@ def query_parkrun(inline_query):
     try:
         pattern = '⏳ Получение данных '
         m1 = types.InlineQueryResultArticle(
-            f'{1}', 'Где бегали наши одноклубники?', description='перечень паркранов',
+            f'{1}', 'Где бегали наши соклубники?', description='перечень паркранов',
             input_message_content=types.InputTextMessageContent(pattern + 'об участии...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/1.jpg',
             thumb_width=48, thumb_height=48)
@@ -147,17 +147,17 @@ def query_parkrun(inline_query):
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/3.jpg',
             thumb_width=48, thumb_height=48)
         m4 = types.InlineQueryResultArticle(
-            f'{4}', 'Топ 10 одноклубников по числу забегов', description='на паркране Кузьминки',
+            f'{4}', 'Топ 10 wakeandrunцев по числу забегов', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'о количестве стартов в Кузьминках...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/4.jpg',
             thumb_width=48, thumb_height=48)
         m5 = types.InlineQueryResultArticle(
-            f'{5}', 'Топ 10 одноклубников по количеству паркранов', description='по всем паркранам',
+            f'{5}', 'Топ 10 wakeandrunцев по количеству паркранов', description='по всем паркранам',
             input_message_content=types.InputTextMessageContent(pattern + 'о количестве всех стартов...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/5.jpg',
             thumb_width=48, thumb_height=48)
         m6 = types.InlineQueryResultArticle(
-            f'{6}', 'Топ 10 результатов одноклубников', description='на паркране Кузьминки',
+            f'{6}', 'Топ 10 результатов соклубников', description='на паркране Кузьминки',
             input_message_content=types.InputTextMessageContent(pattern + 'о рекордах...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/6.jpg',
             thumb_width=48, thumb_height=48)

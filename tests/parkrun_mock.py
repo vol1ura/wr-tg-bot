@@ -4,7 +4,7 @@ import time
 import requests
 from lxml.html import fromstring
 
-from utils.parkrun import parkrun_headers
+from utils.parkrun import PARKRUN_HEADERS
 
 
 class ParkrunMock:
@@ -30,6 +30,6 @@ class ParkrunMock:
 
     def __prepare_results(self):
         time.sleep(2.03)
-        result = requests.get(ParkrunMock.PARKRUN_PAGES[self.__page], headers=parkrun_headers)
+        result = requests.get(ParkrunMock.PARKRUN_PAGES[self.__page], headers=PARKRUN_HEADERS)
         with open(self.__page_path, 'w') as f:
             f.write(result.text)
