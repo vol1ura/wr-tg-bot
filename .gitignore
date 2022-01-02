@@ -3,6 +3,7 @@ service_scripts/
 
 # Environments and IDE
 .idea/
+.vscode/
 env*/
 
 # Chaches
