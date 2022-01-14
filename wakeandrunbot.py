@@ -10,7 +10,7 @@ from geopy.geocoders import Nominatim
 # https://api.telegram.org/{TOKEN}/getMe
 from telebot import types
 
-from utils import content, vk, instagram, weather, parkrun, news, fucomp, search
+from utils import content, vk, instagram, weather, parkrun, news, fucomp, search, impulse
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
@@ -243,7 +243,7 @@ def query_competitions(inline_query):
         logger.error(e)
 
 
-@bot.message_handler(regexp=r'(?i)бот[, \w]+?(паркран\w?|parkrun)( \w+){1,3}( \d+)?$')
+@bot.message_handler(regexp=r'(?i)^бот[, \w]+?(паркран\w?|parkrun)( \w+){1,3}( \d+)?$')
 def parkrun_personal_result(message):
     bot.send_chat_action(message.chat.id, 'typing')
     try:
@@ -257,6 +257,18 @@ def parkrun_personal_result(message):
     except Exception as e:
         logger.error(f'Attempt to generate personal diagram failed. Query: {message.text}. Error: {e}')
         bot.reply_to(message, 'Что-то пошло не так. Возможно, вы неправильно ввели имя.')
+
+
+@bot.message_handler(regexp=r'(?i)^бот[, \w]+?(impulse|импульс)')
+def parkrun_personal_result(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    try:
+        pic = impulse.make_clubs_bar('impulse.png')
+        bot.send_photo(message.chat.id, pic)
+        pic.close()
+    except Exception as e:
+        logger.error(f'Attempt to generate Impulse diagram failed. Query: {message.text}. Error: {e}')
+        bot.reply_to(message, 'Что-то пошло не так. Не удалось построить диаграмму')
 
 
 @bot.message_handler(regexp=r'(?i)бот,? (паркран|parkrun)', content_types=['text'])
