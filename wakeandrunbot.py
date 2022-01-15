@@ -263,7 +263,7 @@ def parkrun_personal_result(message):
 def parkrun_personal_result(message):
     bot.send_chat_action(message.chat.id, 'typing')
     try:
-        pic = impulse.make_clubs_bar('impulse.png')
+        pic = impulse.ImpulseChallenge().make_clubs_bar('impulse.png')
         bot.send_photo(message.chat.id, pic)
         pic.close()
     except Exception as e:
