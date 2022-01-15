@@ -5,6 +5,7 @@ from datetime import date, timedelta
 import matplotlib.pyplot as plt
 import pandas as pd
 import requests
+# from fp.fp import FreeProxy
 from lxml.html import parse, fromstring
 from matplotlib.colors import Normalize
 from matplotlib.ticker import MultipleLocator
@@ -12,7 +13,6 @@ from urllib.parse import urlencode
 
 PARKRUN_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0',
-    'Host': 'parkrun.ru',
     'Accept': '*/*',
     'Accept-Language': 'ru-RU,ru;q=0.5',
     'Accept-Encoding': 'gzip, deflate, br',
@@ -30,7 +30,8 @@ VOLUNTEERS_FILE = 'static/kuzminki_full_stat.txt'
 
 
 def get_html_tree(url):
-    result = requests.get(url, headers=PARKRUN_HEADERS, stream=True)
+    # fp = FreeProxy(elite=True).get()
+    result = requests.get(url, headers=PARKRUN_HEADERS, stream=True) # , proxies={'http': fp})
     result.raw.decode_content = True
     return parse(result.raw)
 
@@ -64,7 +65,7 @@ def get_volunteers() -> str:
         name = line.split(maxsplit=3)[-1].strip()
         volunteers[name] = volunteers.setdefault(name, 0) + 1
 
-    top_volunteers = sorted(volunteers.items(), key=lambda v: v[1], reverse=True)[:10]
+    top_volunteers = sorted(volunteers.items(), key=lambda v: -v[1])[:10]
     result = '*Toп 10 волонтёров parkrun Kuzminki*\n'
     for i, volunteer in enumerate(top_volunteers, 1):
         result += f'{i}. {volunteer[0]} | {volunteer[1]}\n'
@@ -100,8 +101,7 @@ def get_club_table():
     url = 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212'
     page_all_results = requests.get(url, headers=PARKRUN_HEADERS)
     data = pd.read_html(page_all_results.text)[0]
-    data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
-    return data
+    return data.drop(data.columns[[1, 5, 9, 12]], axis=1)
 
 
 def get_kuzminki_fans() -> str:
