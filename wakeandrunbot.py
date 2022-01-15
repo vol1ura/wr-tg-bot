@@ -260,7 +260,7 @@ def parkrun_personal_result(message):
 
 
 @bot.message_handler(regexp=r'(?i)^бот[, \w]+?(impulse|импульс)')
-def parkrun_personal_result(message):
+def parkrun_impulse_club_diagram(message):
     bot.send_chat_action(message.chat.id, 'typing')
     try:
         pic = impulse.ImpulseChallenge().make_clubs_bar('impulse.png')
