@@ -5,7 +5,7 @@ from datetime import date, timedelta
 import matplotlib.pyplot as plt
 import pandas as pd
 import requests
-# from fp.fp import FreeProxy
+from fp.fp import FreeProxy
 from lxml.html import parse, fromstring
 from matplotlib.colors import Normalize
 from matplotlib.ticker import MultipleLocator
@@ -30,8 +30,8 @@ VOLUNTEERS_FILE = 'static/kuzminki_full_stat.txt'
 
 
 def get_html_tree(url):
-    # fp = FreeProxy(elite=True).get()
-    result = requests.get(url, headers=PARKRUN_HEADERS, stream=True) # , proxies={'http': fp})
+    fp = FreeProxy(elite=True).get()
+    result = requests.get(url, headers=PARKRUN_HEADERS, stream=True, proxies={'http': fp})
     result.raw.decode_content = True
     return parse(result.raw)
 
@@ -98,8 +98,9 @@ def add_relevance_notification(content_date: date) -> str:
 
 
 def get_club_table():
+    fp = FreeProxy(elite=True).get()
     url = 'https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212'
-    page_all_results = requests.get(url, headers=PARKRUN_HEADERS)
+    page_all_results = requests.get(url, headers=PARKRUN_HEADERS, proxies={'http': fp})
     data = pd.read_html(page_all_results.text)[0]
     return data.drop(data.columns[[1, 5, 9, 12]], axis=1)
 
@@ -138,8 +139,9 @@ def get_kuzminki_top_results() -> str:
 
 
 def most_slow_parkruns() -> str:
+    fp = FreeProxy(elite=True).get()
     url = 'https://www.parkrun.ru/results/courserecords/'
-    page_all_results = requests.get(url, headers=PARKRUN_HEADERS)
+    page_all_results = requests.get(url, headers=PARKRUN_HEADERS, proxies={'http': fp})
     data = pd.read_html(page_all_results.text)[0]
     table = data.sort_values(by=[data.columns[7]], ascending=False).head(10)
     parkrun = table[table.columns[0]]
@@ -151,8 +153,9 @@ def most_slow_parkruns() -> str:
 
 
 def get_latest_results_df() -> tuple:
+    fp = FreeProxy(elite=True).ge()
     url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
-    page_all_results = requests.get(url, headers=PARKRUN_HEADERS)
+    page_all_results = requests.get(url, headers=PARKRUN_HEADERS, proxies={'http': fp})
     html_page = page_all_results.text
     tree = fromstring(html_page)
     parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
