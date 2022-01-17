@@ -22,9 +22,6 @@ class ImpulseChallenge:
         'Origin': 'https://ihaveimpulse.run',
         'Referer': 'https://ihaveimpulse.run/clubs'
     }
-    __COLORS = [
-        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#17ceaf'
-    ]
 
     @staticmethod
     def __get_payload(date: datetime.date) -> dict:
@@ -45,9 +42,8 @@ class ImpulseChallenge:
         return pd.DataFrame(columns)
 
     @staticmethod
-    def __make_mark(club_name: str, club_users: int) -> str:
-        trimmed_club_name = club_name if len(club_name) < 20 else f'{club_name[:18]}...'
-        return f'{trimmed_club_name}\n{club_users} участников'
+    def __make_mark(club_name: str) -> str:
+        return club_name if len(club_name) < 20 else f'{club_name[:18]}...'
 
     def make_clubs_bar(self, pic: str):
         """Create bar diagram with Top10 clubs for current moment.
@@ -63,20 +59,25 @@ class ImpulseChallenge:
             File object with binary data (`png` picture)
         """
         data = self.__get_tournament_table()
-        data['mark'] = [self.__make_mark(row.Club, row.Users) for row in data.loc[:, ['Club', 'Users']].itertuples()]
-        df = data.sort_values(by=['Dist'], ascending=False).reset_index(
-            drop=True).head(10)
+        data['mark'] = [self.__make_mark(club) for club in data['Club'].values]
+        df = data.sort_values(by=['Dist'], ascending=False).reset_index(drop=True).head(10)
         clubs = df['mark']
-        vals = df['Dist'].values
-        fig = plt.figure(figsize=(6, 6), dpi=150)
-        ax = fig.add_subplot()
-        plt.xticks(rotation=70)
-        plt.bar(clubs, height=vals, color=self.__COLORS)
-        for p, label, mark in zip(ax.patches, vals, clubs.values):
-            if 'Wake&Run' in mark:
-                p.set_facecolor('#9467bd')
-            ax.annotate(round(label), (p.get_x() + 0.05, p.get_height()), va='bottom')
-        plt.title('Top10 клубов в турнире IMPULSE', fontweight='bold')
+        vals = [df['Dist'].values, df['Users'].values, df['Dist'].values / df['Users'].values]
+        colors = ['#1f77b4', '#ff7f0e', '#bcbd22']
+        ylabels = ['Σ, км', 'участников', 'км/чел']
+        fig, axs = plt.subplots(3, 1, sharex=True, figsize=(9,16), dpi=300)
+        plt.xticks(rotation=70, fontsize=14)
+        for ax, val, color, ylabel in zip(axs, vals, colors, ylabels):
+            ax.bar(clubs, height=val, color=color)
+            ax.set_ylabel(ylabel, fontsize=16, fontweight='bold')
+            ax.set_facecolor('0.85')
+            for p, label, mark in zip(ax.patches, val, clubs.values):
+                if 'Wake&Run' in mark:
+                    p.set_facecolor('#9467bd')
+                ax.annotate(round(label), (p.get_x()+p.get_width()/2, p.get_height()),
+                    va='top', ha='center', fontsize=14, color='white', fontweight='bold')
+        axs[0].set_title('Top10 клубов в турнире IMPULSE', fontsize=16, fontweight='bold')
         plt.tight_layout()
+        fig.subplots_adjust(hspace=0)
         plt.savefig(pic)
         return open(pic, 'rb')

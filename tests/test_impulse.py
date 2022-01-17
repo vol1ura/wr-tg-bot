@@ -11,8 +11,7 @@ def test_get_payload():
 
 
 def test_make_mark():
-    mark_short = ImpulseChallenge()._ImpulseChallenge__make_mark('Test Name', 34)
-    assert 'Test Name\n34 участников' == mark_short
-    mark_long = ImpulseChallenge()._ImpulseChallenge__make_mark('Test1Name abcd_+:;z23', 137)
-    assert '137 участников' in mark_long
-    assert 'Test1Name abcd_+:;...' in mark_long
+    mark_short = ImpulseChallenge()._ImpulseChallenge__make_mark('Test Name')
+    assert 'Test Name' == mark_short
+    mark_long = ImpulseChallenge()._ImpulseChallenge__make_mark('Test1Name abcd_+:;z23')
+    assert 'Test1Name abcd_+:;...' == mark_long
