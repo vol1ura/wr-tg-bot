@@ -26,14 +26,14 @@ class ImpulseChallenge:
     @staticmethod
     def __get_payload(date: datetime.date) -> dict:
         return {
-            'func': 'get_Clubs_Year',
-            'json_v': [{'arg': {'Week': date.strftime('%V'), 'Year': date.strftime('%Y')}}]
+            'func': 'get_Clubs_Year_DataTable',
+            'json_v': '[{"arg":{"Week":"%s","Year":"%s"}}]' % (date.strftime('%V'), date.strftime('%Y'))
         }
 
     def __get_tournament_table(self) -> pd.DataFrame:
         payload = self.__get_payload(datetime.date.today())
         page_all_results = requests.post(self.__CLUBS_URL, data=payload, headers=self.__HEADERS)
-        club_results = page_all_results.json()[2]
+        club_results = page_all_results.json()
         columns = {
             'Club': [result['Name_Club'] for result in club_results],
             'Dist': [result['Dist_Sum'] for result in club_results],

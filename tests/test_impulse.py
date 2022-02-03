@@ -5,9 +5,8 @@ from utils.impulse import ImpulseChallenge
 def test_get_payload():
     today = datetime.date(2022, 1, 11)
     payload = ImpulseChallenge()._ImpulseChallenge__get_payload(today)
-    assert payload['func'] == 'get_Clubs_Year'
-    assert payload['json_v'][0]['arg']['Week'] == '02'
-    assert payload['json_v'][0]['arg']['Year'] == '2022'
+    assert payload['func'] == 'get_Clubs_Year_DataTable'
+    assert payload['json_v'] == '[{"arg":{"Week":"02","Year":"2022"}}]'
 
 
 def test_make_mark():
