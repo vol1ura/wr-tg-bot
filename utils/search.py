@@ -30,21 +30,3 @@ def google(phrase):
     res8 = re.sub(r'Последний раз редактировалось .*, \d\d:\d\d, всего', '', res7)
     res9 = re.sub(r'Клубные дела IRC|»|Обсуждение клубных дел IRC|irc', '', res8, re.I)
     return re.sub(r'[,.!?][\w ]+$', '.', res9.strip(), re.MULTILINE)
-
-
-def bashim(phrase):
-    search_phrase = re.sub(r'(?i)\bбот\b|\.|,|!|\?', '', phrase).strip()
-    params = {
-        "text": f"{search_phrase}"
-    }
-    values_url = urllib.parse.urlencode(params)
-    result = requests.get(f'https://bash.im/search?{values_url}', stream=True)
-    result.raw.decode_content = True
-    tree = parse(result.raw)
-    cites = tree.xpath('//article/div/div')
-    if cites:
-        for cite in cites:
-            cite = re.split(r'[\w. ]+?:', re.sub(r'\n', '', cite.text_content()))
-            [cite.remove(s) for s in list(cite) if s == '']
-            print(f'"{cite[0].strip()}",')
-    return ''
