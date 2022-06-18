@@ -15,7 +15,7 @@ def get_competitions(month, year):
     result = requests.post('https://probeg.org/kalend/kalend.php', data=payload, headers=headers, stream=True)
     result.raw.decode_content = True
     tree = parse(result.raw)
-    rows = tree.xpath('//table[@class="textU"]/tr')[1:]
+    rows = tree.xpath('//table[@class="textU"][2]//tr')[1:]
     competitions = []
     from_date = time.localtime(time.time())
     for row in rows:
