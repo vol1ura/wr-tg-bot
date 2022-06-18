@@ -2,6 +2,8 @@ import re
 
 import responses
 
+from utils.search import google
+
 
 def test_google():
     message = google('бот, гречка')
