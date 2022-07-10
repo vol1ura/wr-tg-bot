@@ -5,7 +5,7 @@ geojson~=2.5.0
 geopy~=2.1.0
 gunicorn~=20.1
 inst-api~=0.3.0
-lxml~=4.6.0
+lxml~=4.9.1
 matplotlib==3.4.2
 pandas~=1.3.0
 PySocks~=1.7.1
