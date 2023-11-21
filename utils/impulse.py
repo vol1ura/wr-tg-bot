@@ -4,6 +4,7 @@ ImpulseChallenge
 Supply statistics about Impulse 2022 running challenge
 """
 import datetime
+import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import requests
@@ -65,6 +66,7 @@ class ImpulseChallenge:
         vals = [df['Dist'].values, df['Users'].values, df['Dist'].values / df['Users'].values]
         colors = ['#1f77b4', '#ff7f0e', '#bcbd22']
         ylabels = ['Σ, км', 'участников', 'км/чел']
+        matplotlib.use('agg')
         fig, axs = plt.subplots(3, 1, sharex=True, figsize=(9,16), dpi=300)
         plt.xticks(rotation=70, fontsize=14)
         for ax, val, color, ylabel in zip(axs, vals, colors, ylabels):

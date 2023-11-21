@@ -1,10 +1,12 @@
 .env
 service_scripts/
+*.png
+*.http
 
 # Environments and IDE
 .idea/
 .vscode/
-env*/
+?env/
 
 # Chaches
 __pycache__/

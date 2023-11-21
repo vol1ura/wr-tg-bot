@@ -1,3 +1,4 @@
+import g4f
 import logging
 import os
 import random
@@ -330,6 +331,16 @@ def simple_answers(message):
             ans = [fucomp.best_answer(message.text, fucomp.message_base_m)]
     bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
+
+@bot.message_handler(func=lambda m: random.randint(1, 100) < 45 and '?' in m.text)
+def random_answer(message):
+    response = response = g4f.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": message.text}],
+        timeout=100,
+    )
+    if response:
+        bot.reply_to(message, response, disable_web_page_preview=True, disable_notification=True)
 
 if __name__ == '__main__':  # pragma: no cover
     # bot.remove_webhook()
