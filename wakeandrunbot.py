@@ -1,4 +1,3 @@
-import g4f
 import logging
 import os
 import random
@@ -11,7 +10,7 @@ from geopy.geocoders import Nominatim
 # https://api.telegram.org/{TOKEN}/getMe
 from telebot import types
 
-from utils import content, vk, instagram, weather, parkrun, news, fucomp, search, impulse
+from utils import content, vk, instagram, weather, chat_gpt, news, fucomp, search, impulse
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
@@ -315,10 +314,9 @@ def simple_answers(message):
     else:
         ans = None
 
-    if ans:
-        bot.reply_to(message, random.choice(ans), disable_web_page_preview=True)
-        return
-    else:
+    if not ans:
+        ans = [chat_gpt.ask(message.text)]
+    if not ans:
         bot.send_chat_action(message.chat.id, 'typing')
         ans_variant = random.randrange(2021) % 3
         if ans_variant == 0:
@@ -329,16 +327,12 @@ def simple_answers(message):
             ans = [fucomp.best_answer(message.text, fucomp.message_base_wr)]
         else:
             ans = [fucomp.best_answer(message.text, fucomp.message_base_m)]
-    bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
+    bot.reply_to(message, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 
-@bot.message_handler(func=lambda m: random.randint(1, 100) < 45 and '?' in m.text)
+@bot.message_handler(func=lambda m: random.randrange(100) < 20 and '?' in m.text and len(m.text) > 35)
 def random_answer(message):
-    response = response = g4f.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": message.text}],
-        timeout=100,
-    )
+    response = chat_gpt.ask(message.text)
     if response:
         bot.reply_to(message, response, disable_web_page_preview=True, disable_notification=True)
 

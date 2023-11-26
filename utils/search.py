@@ -3,7 +3,6 @@ import os
 import random
 import re
 import urllib.parse
-from lxml.html import parse
 
 import requests
 
