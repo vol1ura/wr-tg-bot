@@ -192,25 +192,6 @@ def query_air(inline_query):
 #             pic.close()
 #         else:
 #             logger.error('File results.png not found! Or the picture wasn\'t generated.')
-#     elif 'о количестве стартов в Кузьминках' in message.text:
-#         bot.send_message(message.chat.id, parkrun.get_kuzminki_fans(), parse_mode='Markdown')
-#     elif 'о количестве всех стартов' in message.text:
-#         bot.send_message(message.chat.id, parkrun.get_wr_parkruners(), parse_mode='Markdown')
-#     elif 'о рекордах' in message.text:
-#         bot.send_message(message.chat.id, parkrun.get_kuzminki_top_results(), parse_mode='Markdown')
-#     elif 'о российских паркранах' in message.text:
-#         bot.send_message(message.chat.id, parkrun.most_slow_parkruns(), parse_mode='Markdown')
-#     elif 'о волонтёрах' in message.text:
-#         bot.send_message(message.chat.id, parkrun.get_volunteers(), parse_mode='Markdown')
-#     elif 'о клубах...' in message.text:
-#         pic = parkrun.make_clubs_bar('clubs.png')
-#         if os.path.exists("clubs.png"):
-#             bot.send_photo(message.chat.id, pic)
-#             pic.close()
-#         else:
-#             logger.error('File clubs.png not found! Or the picture wasn\'t generated.')
-
-#     bot.delete_message(message.chat.id, message.id)
 
 
 @bot.inline_handler(lambda query: re.search(r'соревнован|старт|забег|competition|event', query.query))
@@ -239,22 +220,6 @@ def query_competitions(inline_query):
         logger.error(e)
 
 
-# @bot.message_handler(regexp=r'(?i)^бот[, \w]+?(паркран\w?|parkrun)( \w+){1,3}( \d+)?$')
-# def parkrun_personal_result(message):
-#     bot.send_chat_action(message.chat.id, 'typing')
-#     try:
-#         turn = re.search(r'\d+$', message.text)
-#         turn = int(turn[0]) % 360 if turn else 0
-#         person = re.sub(r'.*(паркран\w?|parkrun) ', '', message.text)
-#         person = re.sub(r'\d', '', person).strip()
-#         pic = parkrun.make_latest_results_diagram('results.png', person, turn)
-#         bot.send_photo(message.chat.id, pic)
-#         pic.close()
-#     except Exception as e:
-#         logger.error(f'Attempt to generate personal diagram failed. Query: {message.text}. Error: {e}')
-#         bot.reply_to(message, 'Что-то пошло не так. Возможно, вы неправильно ввели имя.')
-
-
 @bot.message_handler(regexp=r'(?i)^бот[, \w]*(impulse|импульс)')
 def parkrun_impulse_club_diagram(message):
     bot.send_chat_action(message.chat.id, 'typing')
@@ -267,7 +232,7 @@ def parkrun_impulse_club_diagram(message):
         bot.reply_to(message, 'Что-то пошло не так. Не удалось построить диаграмму')
 
 
-@bot.message_handler(regexp=r'(?i)бот,? (суббота|5km|9am)', content_types=['text'])
+@bot.message_handler(regexp=r'(?i)бот,? (суббота|5km|9am|5\s?км\b)', content_types=['text'])
 def get_parkrun_picture(message):
     token = os.environ.get('VK_SERVICE_TOKEN')
     bot.send_photo(message.chat.id, vk.get_random_photo(token), disable_notification=True)
@@ -330,7 +295,7 @@ def simple_answers(message):
     bot.reply_to(message, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 
-@bot.message_handler(func=lambda m: random.randrange(100) < 20 and '?' in m.text and len(m.text) > 35)
+@bot.message_handler(func=lambda m: random.randrange(100) < 20 and m.text.endswith('?') and len(m.text) > 35)
 def random_answer(message):
     response = chat_gpt.ask(message.text)
     if response:

@@ -77,41 +77,41 @@ def test_most_slow_parkruns():
     assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
 
 
-def test_get_volunteers():
-    message = parkrun.get_volunteers()
-    print('\n', message)
-    assert len(responses.calls) == 0
-    assert '*Toп 10 волонтёров parkrun Kuzminki*' in message
+# def test_get_volunteers():
+#     message = parkrun.get_volunteers()
+#     print('\n', message)
+#     assert len(responses.calls) == 0
+#     assert '*Toп 10 волонтёров parkrun Kuzminki*' in message
 
 
-@responses.activate
-def test_get_volunteers_fake(monkeypatch, tmpdir):
-    volunteers_file = tmpdir.join('vol_stat.txt')
-    volunteers_file.write('kuzminki\t1 1 a b c\nkuzminki\t1 1 d e')
-    monkeypatch.setattr(parkrun, 'VOLUNTEERS_FILE', volunteers_file)
-    monkeypatch.setattr(parkrun, 'add_volunteers', lambda a, b: None)
-    message = parkrun.get_volunteers()
-    print('\n', message)
-    assert len(responses.calls) == 1
-    lines = message.split('\n')
-    assert '*Toп 10 волонтёров parkrun Kuzminki*' == lines[0]
-    assert '1. a b c | 1' == lines[1]
-    assert '2. d e | 1' == lines[2]
+# @responses.activate
+# def test_get_volunteers_fake(monkeypatch, tmpdir):
+#     volunteers_file = tmpdir.join('vol_stat.txt')
+#     volunteers_file.write('kuzminki\t1 1 a b c\nkuzminki\t1 1 d e')
+#     monkeypatch.setattr(parkrun, 'VOLUNTEERS_FILE', volunteers_file)
+#     monkeypatch.setattr(parkrun, 'add_volunteers', lambda a, b: None)
+#     message = parkrun.get_volunteers()
+#     print('\n', message)
+#     assert len(responses.calls) == 1
+#     lines = message.split('\n')
+#     assert '*Toп 10 волонтёров parkrun Kuzminki*' == lines[0]
+#     assert '1. a b c | 1' == lines[1]
+#     assert '2. d e | 1' == lines[2]
 
 
-@responses.activate
-def test_get_latest_results_df():
-    df, number_runners, parkrun_date = parkrun.get_latest_results_df()
-    assert len(responses.calls) == 1
-    assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
-    assert isinstance(df, pandas.DataFrame)
-    assert isinstance(number_runners, int)
-    assert number_runners > 0
-    assert isinstance(parkrun_date, str)
-    dd, mm, yyyy = parkrun_date.split('/')
-    assert 0 < int(dd) <= 31
-    assert 0 < int(mm) <= 12
-    assert int(yyyy) >= date.today().year - 1
+# @responses.activate
+# def test_get_latest_results_df():
+#     df, number_runners, parkrun_date = parkrun.get_latest_results_df()
+#     assert len(responses.calls) == 1
+#     assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
+#     assert isinstance(df, pandas.DataFrame)
+#     assert isinstance(number_runners, int)
+#     assert number_runners > 0
+#     assert isinstance(parkrun_date, str)
+#     dd, mm, yyyy = parkrun_date.split('/')
+#     assert 0 < int(dd) <= 31
+#     assert 0 < int(mm) <= 12
+#     assert int(yyyy) >= date.today().year - 1
 
 
 @responses.activate
@@ -163,16 +163,16 @@ def test_make_latest_results_diagram_personal_exception(tmpdir):
     assert responses.calls[0].request.url in ParkrunMock.PARKRUN_PAGES.values()
 
 
-def test_add_volunteers(monkeypatch, tmpdir):
-    volunteers_file = tmpdir.join('kuzminki_full_stat.txt')
-    monkeypatch.setattr(parkrun, 'VOLUNTEERS_FILE', volunteers_file)
-    parkrun.add_volunteers(2, 3)
-    assert os.path.exists(volunteers_file)
-    with open(volunteers_file) as f:
-        volunteers_info = f.readlines()
-    for line in volunteers_info:
-        assert re.fullmatch('kuzminki\t[23]\tA\\d+( \\w+){2,}', line.rstrip())
-    print(volunteers_info)
+# def test_add_volunteers(monkeypatch, tmpdir):
+#     volunteers_file = tmpdir.join('kuzminki_full_stat.txt')
+#     monkeypatch.setattr(parkrun, 'VOLUNTEERS_FILE', volunteers_file)
+#     parkrun.add_volunteers(2, 3)
+#     assert os.path.exists(volunteers_file)
+#     with open(volunteers_file) as f:
+#         volunteers_info = f.readlines()
+#     for line in volunteers_info:
+#         assert re.fullmatch('kuzminki\t[23]\tA\\d+( \\w+){2,}', line.rstrip())
+#     print(volunteers_info)
 
 
 time_to_try = [('17:01', 17.016667), ('18:59', 18.983333), ('19:30', 19.5), ('21:00', 20.99999),

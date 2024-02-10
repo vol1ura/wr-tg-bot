@@ -24,7 +24,7 @@ jobs:
         pip install -r tests/requirements_tests.txt
     - name: Check for updates
       run: |
-        pytest tests/test_parkrun.py::test_get_volunteers
+        pytest tests/test_parkrun.py::test_make_latest_results_diagram_personal_exception
     - name: Commit files
       run: |
         git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"

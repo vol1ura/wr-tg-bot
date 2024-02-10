@@ -25,7 +25,6 @@ CLUB_NAME = 'Wake&Run'
 CLUB_ID = 23212
 CLUB_LINK = f"https://www.parkrun.com/profile/groups#{urlencode({'id': CLUB_ID, 'q': CLUB_NAME})}"
 CLUB_INFO = f'[Установи в профиле клуб Wake&Run, перейдя по ссылке]({CLUB_LINK})'
-VOLUNTEERS_FILE = 'static/kuzminki_full_stat.txt'
 
 
 def get_html_tree(url):
@@ -34,41 +33,41 @@ def get_html_tree(url):
     return parse(result.raw)
 
 
-def add_volunteers(start, stop) -> None:
-    url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
-    for parkrun_number in range(start, stop+1):
-        time.sleep(1.11)
-        tree = get_html_tree(url + str(parkrun_number))
-        volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
-        with open(VOLUNTEERS_FILE, 'a') as f:
-            for volunteer in volunteers:
-                volunteer_name = volunteer.text_content()
-                volunteer_id = re.search(r'\d+', volunteer.attrib['href'])[0]
-                f.write(f'kuzminki\t{parkrun_number}\tA{volunteer_id} {volunteer_name}\n')
+# def add_volunteers(start, stop) -> None:
+#     url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
+#     for parkrun_number in range(start, stop+1):
+#         time.sleep(1.11)
+#         tree = get_html_tree(url + str(parkrun_number))
+#         volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
+#         with open(VOLUNTEERS_FILE, 'a') as f:
+#             for volunteer in volunteers:
+#                 volunteer_name = volunteer.text_content()
+#                 volunteer_id = re.search(r'\d+', volunteer.attrib['href'])[0]
+#                 f.write(f'kuzminki\t{parkrun_number}\tA{volunteer_id} {volunteer_name}\n')
 
 
-def get_volunteers() -> str:
-    url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
-    tree = get_html_tree(url)
-    parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
-    with open(VOLUNTEERS_FILE) as f:
-        all_stat = f.readlines()
-    last_parkrun_db = int(all_stat[-2].split()[1])
-    if last_parkrun_db < parkrun_number:
-        add_volunteers(last_parkrun_db + 1, parkrun_number)
-        with open(VOLUNTEERS_FILE) as f:
-            all_stat = f.readlines()
-    volunteers = {}
-    for line in all_stat:
-        name = line.split(maxsplit=3)[-1].strip()
-        volunteers[name] = volunteers.setdefault(name, 0) + 1
+# def get_volunteers() -> str:
+#     url = 'https://www.parkrun.ru/kuzminki/results/latestresults/'
+#     tree = get_html_tree(url)
+#     parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
+#     with open(VOLUNTEERS_FILE) as f:
+#         all_stat = f.readlines()
+#     last_parkrun_db = int(all_stat[-2].split()[1])
+#     if last_parkrun_db < parkrun_number:
+#         add_volunteers(last_parkrun_db + 1, parkrun_number)
+#         with open(VOLUNTEERS_FILE) as f:
+#             all_stat = f.readlines()
+#     volunteers = {}
+#     for line in all_stat:
+#         name = line.split(maxsplit=3)[-1].strip()
+#         volunteers[name] = volunteers.setdefault(name, 0) + 1
 
-    top_volunteers = sorted(volunteers.items(), key=lambda v: -v[1])[:10]
-    result = '*Toп 10 волонтёров parkrun Kuzminki*\n'
-    for i, volunteer in enumerate(top_volunteers, 1):
-        result += f'{i}. {volunteer[0]} | {volunteer[1]}\n'
+#     top_volunteers = sorted(volunteers.items(), key=lambda v: -v[1])[:10]
+#     result = '*Toп 10 волонтёров parkrun Kuzminki*\n'
+#     for i, volunteer in enumerate(top_volunteers, 1):
+#         result += f'{i}. {volunteer[0]} | {volunteer[1]}\n'
 
-    return result.strip()
+#     return result.strip()
 
 
 def get_participants() -> str:
